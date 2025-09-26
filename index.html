@@ -2,517 +2,229 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- import bootstrap 4 from cdn -->
+    <title>Severin Field</title>
     
-    
-    <!-- Stylesheets -->
-    <!-- fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="style/colors-and-fonts.css" rel="stylesheet" type="text/css">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+      -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Bungee&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Comic+Relief:wght@400;700&family=Rubik+Gemstones&family=Rubik+Mono+One&family=Rubik+Pixels&family=Rubik+Scribble&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Schoolbell&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            /* font-family: serif; */
+            font-family: 'Rubik', serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
 
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
 
+        .header {
+            margin-bottom: 50px;
+            text-align: center;
+        }
 
-    <link href="style/index.css" rel="stylesheet" type="text/css">
-    <!-- import asteroid.css in the style folder -->
-    <link href="style/asteroid.css" rel="stylesheet" type="text/css">
-    <!-- import stars.css from the style folder -->
-    <link href="style/stars.css" rel="stylesheet" type="text/css">
-    <link href="style/table.css" rel="stylesheet" type="text/css">
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
 
-    <script src="js/asteroid.js" type="module"></script>
+        .header .links {
+            margin-top: 5px;
+        }
 
+        .header .links a {
+            color: #ff6b6b;
+            font-size: 0.95rem;
+            margin: 0 5px;
+        }
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        section {
+            margin-bottom: 50px;
+        }
 
-    <!-- BOOTSTRAP BORDERS FOR TESTING -->
-    <!-- <link href="style/bootstrap-borders.css" rel="stylesheet" type="text/css"> -->
-    <script src="js/modal.js" type="module"></script>
-    
-    <title>Severin Field Portfolio</title>
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        /* Glitch effect on hover */
+        a:hover {
+            animation: glitch 0.3s ease;
+        }
+
+        @keyframes glitch {
+            0%, 100% { 
+                text-shadow: 
+                    0.02em 0 0 rgba(255,0,0,0.75),
+                    -0.02em -0 0 rgba(0,255,0,0.75),
+                    0.025em 0.05em 0 rgba(0,0,255,0.75);
+            }
+            15% { 
+                text-shadow: 
+                    0.5em 0 0 rgba(255,0,0,0.75),
+                    -0.5em -0 0 rgba(0,255,0,0.75),
+                    0.25em 0.05em 0 rgba(0,0,255,0.75);
+            }
+            50% { 
+                text-shadow: 
+                    -0.02em 0.02em 0 rgba(255,0,0,0.75),
+                    0.02em -0.02em 0 rgba(0,255,0,0.75),
+                    -0.025em 0.05em 0 rgba(0,0,255,0.75);
+            }
+        }
+
+        .year {
+            opacity: 0.6;
+            font-size: 0.9rem;
+            margin-left: 8px;
+        }
+
+        .venue {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .authors {
+            opacity: 0.9;
+        }
+
+        .award {
+            color: #ffd700;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        .claude-signature {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .claude-signature:hover {
+            opacity: 0.8;
+        }
+
+        .claude-signature a {
+            color: #ffffff;
+            font-size: 0.75rem;
+        }
+    </style>
 </head>
-<body class="bg-blue">
-    
-<!-- top hero section -->
-<div class="stars"></div>
-<div class="twinkling"></div>
-
-
-<!-- modal -->
-<center>
-  <div class="modal in" id="viewImg" tabindex="-1" role="dialog" style="display: none;">
-    <div class="modal-dialog modal-lg" style="width: 100%">
-      <div class="modal-content" style="width: 100%">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-          <h4 class="modal-title">View Image</h4>
-        </div>
-        <div class="modal-body">
-          <div id="imgViewer" style="overflow-x: scroll;">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</center>
-
-<!-- <div id="hero"> -->
-    <!-- <canvas id="bg"></canvas> -->
-    <br>
+<body>
     <div class="container">
-       
-        <div class="col-md-6 col-sm-10 ">
-            <div class="row mt-5"><h1 class="title">> Severin Field</h1>
-              <!-- <h2>Researching the <a href="https://aisafety.dance/" target="_blank">alignment problem</a> in hopes of building <a href="https://intelligence.org/files/CFAI.pdf" target="_blank">friendly AGI</a></h2><br> -->
-              <h2 class="subtext">
-                <a target="_blank" href="https://github.com/sevdeawesome"><i class="fa fa-github"></i></a>   
-                <a href="https://www.linkedin.com/in/severin-field-3b2960165/" target="_blank"><i class="fa fa-linkedin"></i></a>
-                <a target="sfiel003@ucr.edu" href="mailto:sfiel003@ucr.edu"><i class="fa fa-envelope"></i></a>  
-                <!-- add x/twitter -->
-                <a target="_blank" href="https://x.com/sevdeawesome"><i class="fa-brands fa-x-twitter"></i></a>
-                <!-- google scholar -->
-                <a target="_blank" href="https://scholar.google.com/citations?user=NqzWouQAAAAJ&hl=en&citsig=ANVigOt3b0icySTzk7fUxccGxH4B"><i class="fa fa-graduation-cap"></i></a>
-              </h2>
+        <div class="header">
+            <h1>Severin Field</h1>
+            <div class="links">
+                <a href="https://github.com/sevdeawesome">GitHub</a>   
+                <a href="https://twitter.com/sevdeawesome">Twitter</a> 
+                <a href="mailto:sfiel003@ucr.edu">Email</a>
             </div>
-
-            
-            
         </div>
-        
-        <center><canvas id="bg"></canvas></center>
-    </div>
-    
-    
-    <!-- <div class="container"><canvas id="bg"></canvas></div> -->
-</div>
-<br>
 
+        <img src="yard_sign.jpg" style="width: 100%; max-width: 500px; margin: 30px auto; display: block; border-radius: 8px; opacity: 0.95;">
 
-<div id="work" class="container">
-   
+        <section>
+            <h2>Publications</h2>
+            <ul>
+                <li>
+                    <span class="authors"><strong>Field, S.</strong></span> 
+                    "Why do Experts Disagree on Existential Risk and P(doom)? A Survey of AI Experts" 
+                    <span class="venue">Journal of AI and Ethics</span>, 2025. 
+                    <a href="https://arxiv.org/abs/2502.14870">[arXiv]</a>
+                </li>
+                <li>
+                    <span class="authors">Kirsch, N., <strong>Field, S.</strong>, Casper, S.</span> 
+                    "What Features in Prompts Jailbreak LLMs? Investigating the Mechanisms Behind Attacks." 
+                    <span class="venue">NeurIPS 2024 Workshop on Red Teaming Generative AI</span>. 
+                    <a href="https://arxiv.org/abs/2411.03343">[arXiv]</a>
+                </li>
+                <li>
+                    <span class="authors">Yampolskiy, R., <strong>Field, S.</strong></span> 
+                    "Assessing Controllability through Compliance with Irrational Orders" 
+                    <span class="venue">Handbook of Human-Centered Artificial Intelligence</span>.
+                </li>
+                <li>
+                    <span class="authors">Clymer, J., Juang, C., <strong>Field, S.</strong></span> 
+                    "Poser: Unmasking Alignment Faking LLMs by Manipulating Their Internals." 
+                    arXiv:2405.05466, 2024. 
+                    <a href="https://arxiv.org/abs/2405.05466">[arXiv]</a>
+                    <span class="award">✨ SafeBench AI Safety $20,000 Prize Winner</span>
+                </li>
+                <li>
+                    <span class="authors">Costranelli, A., Alan, M., <strong>Field, S.</strong></span> 
+                    "Meta-Models: An Architecture for Decoding LLM Behaviors Through Interpreted Embeddings and Natural Language." 
+                    arXiv:2410.02472, 2024. 
+                    <a href="https://arxiv.org/abs/2410.02472">[arXiv]</a>
+                </li>
+                <li>
+                    <span class="authors"><strong>Field, S.</strong>, Krueger, D.</span> 
+                    "AI Researchers' Perspectives on Automating AI R&D and Intelligence Explosions".
+                </li>
+            </ul>
+        </section>
 
+        <section>
+            <h2>Blog Posts</h2>
+            <ul>
+                <li><a href="https://sevdeawesome.substack.com/p/the-animals-arent-alright">The Animals Aren't Alright</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/the-west-lost-solar-can-we-avoid">The West Lost Solar, Can We Win AI Hardware?</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/nvidias-push-to-sell-americas-future">Nvidia's Push to Sell America's Future to China</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/the-speed-dilemma">The Speed Dilemma</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/i-read-every-survey-on-ai-researchers">I Read Every Survey of AI Researchers So You Don't Have To</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/whirlwind-tour-of-chain-of-thought">Whirlwind Tour of Chain of Thought Literature Relevant to Automating Alignment Research</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/a-review-of-weak-to-strong-generalization">A Review of Weak to Strong Generalization</a></li>
+            </ul>
+        </section>
 
-    <div class="table">
-      <ul class="nav nav-pills" id="desktopmenu">
-        
-        <!-- <li><a data-toggle="tab" href="#menuintel">Intel</a></li> -->
-        
-        
-        <li class="dropdown" > <!--id="mobilemenu"-->
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-            Experience<span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li> <a href="#home" data-toggle="tab">Home Page</a></li>
-                <li><a data-toggle="tab" href="#menu3">Intel</a></li>
-                <li><a data-toggle="tab" href="#menu0">Undergrad Research</a></li>
-              <li><a data-toggle="tab" href="#menu1">Computer Vision Intern @ LLNL </a></li>
-              </ul>
-            </li>
-
-
-          <li class="dropdown" > <!--id="mobilemenu"-->
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-              Projects <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a data-toggle="tab" href="#menu12">AI Alignment</a></li>
-                <li><a data-toggle="tab" href="#menu7">Machine Learning</a></li>
-                <li><a data-toggle="tab" href="#menu2">Software</a></li>
-                <li><a data-toggle="tab" href="#menu4">Physics Experiments</a></li>
-                <li><a data-toggle="tab" href="#menu6">Minecraft Modding</a></li>
-              </ul>
-            </li>
-        </ul>
-       <br>
-        <div class="tab-content">
-    
-    
-
-          <!-- !intel as home -->
-          <!-- !intel as home -->
-          <!-- !intel as home -->
-          <div id="home" class="tab-pane fade in active padding">
-            <h1>Hello!</h1><p>This is my portfolio! I'm currently researching the AI <a href="https://aisafety.dance/" target="_blank">alignment problem</a></p><br>
-            
-
-
-           
-          </div>
-
-          <div id="menu3" class="tab-pane fade in padding">
-            <img src="img/intel+tf.png" width="600px">
-            <h1>AI Frameworks Engineer</h1>
-            <p>
-              At Intel I:
-              <ul>
-                <li><p>built a test harness and CI Pipepne for MLIR Extensions, a compiler infrastructure used in machine learning frameworks</p> </li>
-                <li><p>was the SPOC transitioning from Jenkins to Github Actions in AI Frameworks Team at Intel</p></li>
-                <li><p>contributed to Intel TensorFlow Extensions</p></li>
-                <li><p>performed benchmarks on models for Argonne National Labs on Intel Max Series GPU.</p></li>
-              </ul> 
-            </p>
-          </div>
-
-
-
-          <!-- !LIGO -->
-          <!-- !LIGO -->
-          <!-- !LIGO -->
-          <div id="menu0" class="tab-pane fade in padding">
-            <h1>Research for the Laser Interferometer Gravitational-Wave Organization</h1>
-            <p>LIGO operates 4km long interferometers to detect gravitational waves. The first GW detection earned a UCR professor, Dr. Barry Barrish, a nobel prize. 
-              I collaborated with researchers to develop an anomaly detection algorithm that clusters time-series data from LIGO auxilary channels. 
-              Our method involved generating segmented data from hundreds of physical sensors, run dynamic time warping on the data, employ k-means on time-warped data, and then using cluster matching (hungarian algorithm)
-            to monitor the cluster change events. Cluster change events can be interpreted as spurious behavior.</p>
-                <br>
-            <h2>Poster Presented at LIGO conference</h2>
-              <center><img src="img/lvk.png" class="img enlargable"></center>
-            
-          </div>
-
-
-          <!-- !LLNL -->
-          <!-- !LLNL -->
-          <!-- !LLNL -->
-          <div id="menu1" class="tab-pane fade in padding">
-            <h1>Lawrence Livermore National Labs Data Science Challenge</h1>
-            <p>
-              Worked in a team including undergraduates, a graduate student, and an LLNL physicist on two physics related computer vision problems.
-              The projects included data cleaning, 
-              EDA, training, testing / contrasting various machine learning models, and creating visuals.
-              <br><br>
-              <b>Problem 1: </b>Our first problem was given a supervised learning problem where we had to classify stars vs. galaxies.
-              <br><br>Figure 1. The data set has 4 channels for different bandwidths from optical filters. 
-              <img src="img/DSC.png" class="img3 enlargable"><br><br>
-              <br>
-              <b>Problem 2:  </b> We created multiple models to spot asteroids in 
-              large images of space (using a sliding window). Achieved 97% accuracy in spotting asteroids in unseen testing data. Compared resnet, inception, GMM's, Naive Bayes, and other models.
-
-              <br><br>Figure 2. A gif I created showing the sliding window over a large image of space, where the network was able to spot asteroids.
-              <img src="img/dsc.gif" class="img3 enlargable"><br><br>
-            </p>
-          </div>
-          
-    
-          <!-- !CS PROJECTS -->
-          <!--! CS PROJECTS -->
-          <!--! CS PROJECTS -->
-          <div id="menu2" class="tab-pane fade padding">
-            <h1>
-              Some Computer Science Projects
-            </h1>
-            <!-- <h2>* See also 831poker project</h2> -->
-    
-            <h3>831Poker</h3>
-            <p>
-              Poker including a chat app, and multiple lobbies/games for scalability. 
-              Built in Node.JS, vanilla javascript express/socket IO. 
-              <br>
-              Uses Microsoft Azure (still on a free trial somehow) <a href="https://831poker.azurewebsites.net/">https://831poker.azurewebsites.net/</a>
-              <br>
-              Updoot the code here: <a href="https://github.com/sevdeawesome/831poker">https://github.com/sevdeawesome/831poker</a>
-            <br><br>
-              <img src="img/831poker.png" style="max-width: 96%;" class="enlargable">
-            </p>
-    <br><br>
-    
-             <h3> Networking App</h3>
-             <p>
-              In Database Management class, a classmate and I created a Java social networking app connected to an SQL database of user and connection information.
-              <br>More info can be found at: <a target="_blank" href=" https://github.com/sevdeawesome/Networking-App"> https://github.com/sevdeawesome/Networking-App</a>
-              </p>
-    
-               
-              <h3> Calendar App</h3>
-             <p>
-              Two classmates and I created a C++ calendar app that allows users to create, edit, and delete events. 
-              The project was focused on design patterns, scrum/agile and learning how to use git and implement automatic testing. 
-              <br>More info can be found at: <a target="_blank" href=" https://github.com/sevdeawesome/C-Calendar"> https://github.com/sevdeawesome/C-Calendar</a>
-              </p>
-    
-             
-             
-    
-    
-    
-          </div>
-    
-
-          <!--! AI Safety  -->
-          <!--! AI Safety  -->
-          <!--! AI Safety  -->
-          <div id="menu12" class="tab-pane fade padding">
-            <h2>AI Safety Work</h2>
-              <p>
-                I've been interested in AI since college, where I read Max Tegmark, Ray Kurzweil, Eliezer Yudkowsky and others. 
-                My current favorite book is AI Safety and Security by Dr. Roman Yampolskiy.
-                <br>
-                <br>
-                I'll add more to this section soon.
-              </p>
-      <br><hr><br>
-      <h3>ERA Fellowship</h3>
-              <p>I participated in two AI safety research projects in Cambridge:
-                <!-- project 1 (survey) is found at /survey/survey.pdf, project two is found at https://arxiv.org/abs/2411.03343 and was accepted to neurips -->
-                <br><br>
-                Built a dataset of over 10,000 jailbreak attempts and led research investigating mechanisms underlying
-language model attacks: <a href="https://arxiv.org/abs/2411.03343">https://arxiv.org/abs/2411.03343</a>
-                <br><br>
-                <!-- survey -->
-                Conducted a survey of over 100 AI experts: <a href="survey/">Survey Project</a>
-              </p>
-      <br><hr><br>
-      <h3>POSER</h3>
-              <p>I co-authored POSER (<a href="https://arxiv.org/html/2405.05466v2">https://arxiv.org/html/2405.05466v2</a>) We trained LLMs to fake alignment and defect when they can get away with it (<a href="https://www.lesswrong.com/tag/deceptive-alignment">see deceptive alignment</a>). We ask whether we can catch alignment fakers with interpretability methods and introduce an interpretability benchmark. Submitted to NeurIPS</p>
-      <br><hr><br>
-
-      <h3>Meta-Models</h3>
-              <p>I co-authored "Meta-Models: An Architecture for Decoding LLM Behaviors Through Interpreted Embeddings and Natural Language"(<a href="https://arxiv.org/abs/2410.02472">https://arxiv.org/abs/2410.02472</a>) Developing novel approaches for language model introspection using meta-models</p>
-      <br><hr><br>
-
-      <h3>AI Safety Camp</h3>
-        <p>Currently working with Bogdan-Ionut Cirstea on a literature review of superalignment (OpenAI's alignment plan). We have a website for the project! <a href="https://promisingness-of-automating-alignment.github.io/">https://promisingness-of-automating-alignment.github.io/</a></p>
-        <br><hr><br>
-
-        <h3>Global Challenges Project Conference</h3>
-        <p>Attending global challenges conference and workshop on AI Safety and bio-risk. November 24-27, 2023</p>
-      <br><hr><br>
-      <h3>AGIRisk.org</h3>
-        <p>
-        Langchain Chatbot to explain the gravity of the existential risk of recursively self-improving intelligent systems.
-        <br>More information can be found at: <a target="_blank" href="http://agirisk.org">agirisk.org</a>
-          <br>
-        <img src="img/agirisk.png" style="max-width: 86%;" class="enlargable">
-      </p>
-      <br><hr><br>
-      <h3>AI Safety Reading Group</h3>
-      <p>wip</p>
-      <h3>Persuasion Project</h3>
-      <p>wip</p>
-          </div>
-          
-
-          
-          
-
-          <!--!Machine Learning Projects  -->
-          <!--!Machine Learning Projects  -->
-          <!--!Machine Learning Projects  -->
-          <div id="menu7" class="tab-pane fade padding">
-            
-            <h1>Some Artificial Intelligence Projects</h1>
-            <p>
-              Outside of class and work, I've learned machine learning with Jeremy Howards fast.ai course, The HuggingFace Reinforcement Learning course, Practical Deep Learning for Coders by Jeremy Howard, Yoshua Bengio's deep learning textbook, MML (Math for Machine Learning), 
-              and other resources. 
-              <br><br>
-               Below are some projects
-            </p>
-<br><br><hr><br><br>
-            <h3>A* Search</h3>
-            <p>
-            Search is a ubiquitous tool in data science. 
-            I used multiple different heuristics with A* search to solve the 8 puzzle, comparing their runtime and storage complexity. 
-            <br>More information can be found at: <a target="_blank" href="https://github.com/sevdeawesome/A-Star-Search">https://github.com/sevdeawesome/A-Star-Search</a>
-              <br>
-            <img src="img/asearch.png" style="max-width: 86%;" class="enlargable">
-          </p>
-  
-          <br><br><hr><br><br>
-
-            <h3>Feature Selection / Dimensionality Reduction</h3>
-            <p> 
-            One of my projects in Intro to AI class. After learning about the curse of dimensionality I made a tool that finds the optimal subset of features when using a simple k-means classification model on a dataset of supervised machine learning data. 
-            <br>More info can be found at: <a target="_blank" href="https://github.com/sevdeawesome/Feature-Selection">https://github.com/sevdeawesome/Feature-Selection</a>
-            <img src="img/featureselection.png" style="max-width: 86%;" class="enlargable">
-          </p>
-
-          <br><br><hr><br><br>
-
-
-              <h3>Kaggle Competition: Key Points </h3>
-              <p>
-                <b>This is my first Kaggle competition. I will do more!</b> Predicting the location of key points on faces. 
-                <br><br>
-                Built dataloaders and started with a minimum viable CNN. Used a small data subset for rapid iteration using model improvement techniques including: test time augmentation, hyperparameter tuning, gradient accumilation (to save memory), dropout regularization, bagging multiple models and layer freezing (with resnet pretrained values). 
-                 <br><br>My final submission used transfer learning with resnet, dropout regularization after the first layer and before the last, gradient accumilation, and hyperparameter tuning  to improve accuracy.  
-                 <br><br>View the notebooks and results <a href="https://github.com/sevdeawesome/facial-keypoints-detection">here</a>
-                 
-                <br>
-                <img src="img/kaggle1.png" style="max-width: 86%;" class="enlargable">
-                </p>
-              
-              <br><br>
-              <hr>
-              <br><br>
-
-              <h3> Monte Carlo Problem (extra credit in AI class)</h3>
-              <p>
-               Monte Carlo approximation is used in many machine learning algorithms. Including reinforcement learning, the famous AlphaGo, and my favorite: Mu Zero. <br><br>
-               
-                Create an equilateral triangle and pick a point randomly on each edge (see below). What is the probability that the point in the center of the large triangle is
-                within the sub-triangle created by the three random points?
-                
-               
-               <br>Github link: <a target="_blank" href="https://github.com/sevdeawesome/monte_carlo_triangle">https://github.com/sevdeawesome/monte_carlo_triangle</a>
-              <br> <img src="https://raw.githubusercontent.com/sevdeawesome/monte_carlo_triangle/master/tri4.png">
-             </p>
-
-             <br><br>
-              <hr>
-              <br><br>
-
-              <h3>Optimal Image Compression</h3>
-              <p>
-                In data analytics class, a group of classmates and I found the optimal color compression of an image as a project on k-means clustering. K-means was one of the first algorithms used in imagenet.
-                <br><br>My job was finding the optimal k with an elbow finding algorithm.
-                 <br>
-                 This was a mini-project. I think it's cool to visualize k-means. Now I use elbow finding algorithms all the time!
-                <img src="img/kmeanscat.png" style="max-width: 86%;" class="enlargable">
-
-                <br><br>
-              <hr>
-              <br><br>
-
-              <h3>Terraforming Mars: Lux AI Reinforcement Learning Competition</h3>
-              <p>
-              <a href="https://www.kaggle.com/competitions/lux-ai-season-2">Coming soon</a>
-      <br><br>
-              <img src="img/huggingface.png" style="max-width: 30px;" >
-              </p>
-            </div>
-
-
-          
-          <!--!831Poker  -->
-          <!--!831Poker  -->
-          <!--!831Poker  -->
-    
-          <div id="menu3" class="tab-pane fade padding">
-            <img src="img/831poker.png" style="max-width: 96%;" class="enlargable">
-    
-            <h1>831Poker</h1>
-            <p>
-              Poker including a chat app, and multiple lobbies/games for scalability. 
-              Built in Node.JS, vanilla javascript express/socket IO.
-              <br>
-              Uses Microsoft Azure (still on a free trial somehow) <a href="https://831poker.azurewebsites.net/">https://831poker.azurewebsites.net/</a>
-              <br>
-              Updoot the code here: <a href="https://github.com/sevdeawesome/831poker">https://github.com/sevdeawesome/831poker</a>
-            </p>
-          </div>
-    
-    
-    
-          <!-- !PHYYSICS -->
-          <!-- !PHYYSICS -->
-          <!-- !PHYYSICS -->
-          <div id="menu4" class="tab-pane fade padding">
-         
-              <img src="img/gw-merger.jpg" style="max-width: 40%; border-radius: 10px;">
-              <h1>A couple physics experiments I did in college</h1>
-              <p>
-                <ol>
-                  <li><p>
-                    <a href="physics/noise.pdf">Using Noise to Calculate the Charge of an Electron</a><br>
-                   Experimentally calculating the charge of an electron and Boltzmann's constant
-                     by measuring resistor noise correlation with temperature and voltage.
-                      
-                  </p></li>
-                    <li>
-                      <p> <a href="physics/holography.pdf">Creating a Hologram with a High Powered HeNe Laser</a><br>
-                      Creating holograms with a high powered HeNe laser. Hologram = virtual image seen by recording an interference pattern
-                      onto a photoplate. </p></li>
-                  <li>
-                    <p><a href="physics/noise.pdf">Classifying radioactive isobars</a><br>
-                    Identifying decay schemes of radioactive isobars with python.</p></li>
-                  <li>
-                    <p><a href="physics/ligo_gw.pdf">The Most Precise Measurement in Human History: LIGO, the
-                      Detection of Gravitational Waves, and the Future of Physics</a><br>
-                    Explaining LIGO and gravitational wave physics to a general audience.
-                  </p></li>
-                </ol>
-    
-                <p>
-                </p>
-                
-             
-          
-          </div>
-    
-    
-        <!-- !ADD SOON -->
-        <!-- !ADD SOON -->
-        <!-- !ADD SOON -->
-          <div id="menu5" class="tab-pane fade padding">
-            <h1>Web Projects and Discord Bots <span style="font-size:12px">add this section later</span></h1>
-            <p>willing to design your website for 100k. Serious inquiries only </p>
-
-          </div>
-    
-    
-    
-        <!-- !MINECRAFT MODDING -->
-        <!-- !MINECRAFT MODDING -->
-        <!-- !MINECRAFT MODDING -->
-          <div id="menu6" class="tab-pane fade padding">
-            <h1>Minecraft Modding</h1>
-            <p>In high school, some friends and I created minecraft mods and modpacks and ran public servers. 
-             Received over 100,000 downloads on technic. Over 20,000 unique players joined our servers.
-              <br>
-              Here are some of the trailers for our modpacks:
-            </p>
-    
-            <div class="row">
-              <div class="col-md-6">
-                <iframe width="100%" height="315px" src="https://www.youtube.com/embed/zfzb5SsoI_o" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              </div>
-              <div class="col-md-6">
-                <iframe width="100%" height="315px" src="https://www.youtube.com/embed/U4_IwLWkQ3Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              </div>
-            </div>
-          </div>
+        <div class="claude-signature">
+            <a href="https://claude.ai">made with ♥ by claude</a>
         </div>
-      </div>
     </div>
-
-
-
-</div>
- <!-- <div class="container" id="calendarcontainer">
-<div id="calendar">
-  <script src="https://unpkg.com/github-calendar@latest/dist/github-calendar.min.js"></script>
-
-<link rel="stylesheet" href="https://unpkg.com/github-calendar@latest/dist/github-calendar-responsive.css"/>
-
-
-<div class="calendar">
-    Loading the data just for you.
-</div>
-
-<script>
-    GitHubCalendar(".calendar", "sevdeawesome");
-    // or enable responsive functionality
-    GitHubCalendar(".calendar", "sevdeawesome", { responsive: true });
-</script>
-</div>
-</div>  -->
-
-
-
-<br><br><br>
-<br><br><br>
-<br><br><br>
-<br><br><br>
-<!-- <script src="js/herobackground.js"></script> -->
 </body>
 </html>
