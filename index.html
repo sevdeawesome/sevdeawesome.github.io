@@ -9,9 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap" rel="stylesheet">
       -->
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Bungee&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Comic+Relief:wght@400;700&family=Rubik+Gemstones&family=Rubik+Mono+One&family=Rubik+Pixels&family=Rubik+Scribble&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Schoolbell&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Bungee&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Comic+Relief:wght@400;700&family=Rubik+Gemstones&family=Rubik+Mono+One&family=Rubik+Pixels&family=Rubik+Scribble&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Schoolbell&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         * {
@@ -92,19 +92,11 @@
         }
 
         .header .links a.substack {
-            background: linear-gradient(93deg, #ffe39d 10%, #fec163 100%);
-            color: #492b0a;
-            border: 2px solid #fec163;
-            font-weight: 700;
-            text-shadow: 0 1px 0 #fff6cd;
-            letter-spacing: 0.04em;
+            /* Make Substack a normal button (inherits all from .links a, no unique styles) */
         }
 
         .header .links a.substack:hover {
-            background: linear-gradient(93deg, #ffcf60 0%, #ffb744 100%);
-            color: #281500;
-            border: 2px solid #ffb744;
-            text-shadow: 0 2px 8px #ffd581, 0 1px 0 #fffbe6;
+            /* No unique hover style, inherits from .links a:hover */
         }
 
         section {
@@ -189,7 +181,6 @@
             font-size: 0.75rem;
             opacity: 0.5;
         }
-
 
         .claude-signature a {
             color: #ffffff;
