@@ -66,29 +66,38 @@
 
         .header .links a {
             color: #ff6b6b;
-            font-size: 1.25rem;
-            margin: 0 8px;
-            padding: 12px 26px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 32px;
+            font-size: 1.1rem;
+            padding: 13px 22px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 6px;
             font-weight: 500;
-            box-shadow: 0 1px 8px 0 rgba(255,107,107,0.07);
-            letter-spacing: 0.02em;
-            border: 2px solid transparent;
-            transition: 
-                background 0.18s,
-                border 0.15s,
-                transform 0.12s,
-                text-shadow 0.14s;
+            letter-spacing: 0.01em;
+            border: 1px solid rgba(255,255,255,0.10);
+            transition:
+                background 0.18s ease,
+                border-color 0.18s ease,
+                transform 0.18s ease,
+                color 0.18s ease;
             text-align: center;
         }
 
         .header .links a:hover {
-            background: #282828;
-            border: 2px solid #ff6b6b;
-            transform: scale(1.055) translateY(-2px);
-            animation: glitch 0.3s ease;
-            z-index: 1;
+            background: rgba(255,107,107,0.10);
+            border-color: #ff6b6b;
+            color: #ff8787;
+            transform: translateY(-1px);
+            animation: none;
+            text-shadow: none;
+        }
+
+        .header .links a:active {
+            transform: translateY(0);
+            background: rgba(255,107,107,0.16);
+        }
+
+        .header .links a:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
         }
 
         .header .links a.substack {
@@ -97,6 +106,13 @@
 
         .header .links a.substack:hover {
             /* No unique hover style, inherits from .links a:hover */
+        }
+
+        @media (max-width: 600px) {
+            .header .links a {
+                font-size: 1rem;
+                padding: 12px 18px;
+            }
         }
 
         section {
