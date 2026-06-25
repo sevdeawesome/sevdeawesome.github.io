@@ -53,13 +53,58 @@
         }
 
         .header .links {
-            margin-top: 5px;
+            margin-top: 14px;
+        }
+
+        .header .links {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 14px;
         }
 
         .header .links a {
             color: #ff6b6b;
-            font-size: 0.95rem;
-            margin: 0 5px;
+            font-size: 1.25rem;
+            margin: 0 8px;
+            padding: 12px 26px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 32px;
+            font-weight: 500;
+            box-shadow: 0 1px 8px 0 rgba(255,107,107,0.07);
+            letter-spacing: 0.02em;
+            border: 2px solid transparent;
+            transition: 
+                background 0.18s,
+                border 0.15s,
+                transform 0.12s,
+                text-shadow 0.14s;
+            text-align: center;
+        }
+
+        .header .links a:hover {
+            background: #282828;
+            border: 2px solid #ff6b6b;
+            transform: scale(1.055) translateY(-2px);
+            animation: glitch 0.3s ease;
+            z-index: 1;
+        }
+
+        .header .links a.substack {
+            background: linear-gradient(93deg, #ffe39d 10%, #fec163 100%);
+            color: #492b0a;
+            border: 2px solid #fec163;
+            font-weight: 700;
+            text-shadow: 0 1px 0 #fff6cd;
+            letter-spacing: 0.04em;
+        }
+
+        .header .links a.substack:hover {
+            background: linear-gradient(93deg, #ffcf60 0%, #ffb744 100%);
+            color: #281500;
+            border: 2px solid #ffb744;
+            text-shadow: 0 2px 8px #ffd581, 0 1px 0 #fffbe6;
         }
 
         section {
@@ -158,9 +203,10 @@
             <h1>Severin Field</h1>
             <p>PhD student @ Louisville Cybersecurity Lab. I don't think AI is a normal technology.</p>
             <div class="links">
+                <a href="https://sevdeawesome.substack.com/" target="_blank" class="substack">Substack</a>
                 <a href="https://scholar.google.com/citations?user=NqzWouQAAAAJ&hl=en" target="_blank">Google Scholar</a>
                 <a href="https://github.com/sevdeawesome" target="_blank">GitHub</a>   
-                <a href="https://twitter.com/sevdeawesome" target="_blank">Twitter</a> 
+                <a href="https://twitter.com/sevdeawesome" target="_blank">Twitter</a>
                 <a href="mailto:sfiel003@ucr.edu">Email</a>
             </div>
         </div>
