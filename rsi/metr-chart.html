@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METR Task Horizon Benchmark</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 24px 20px 16px;
+            user-select: none;
+        }
+
+        #chart-container { width: 100%; position: relative; }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        .chart-subtitle {
+            font-size: 0.73rem;
+            color: rgba(255,255,255,0.42);
+            margin-bottom: 14px;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── Controls row ── */
+        #controls {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        /* Scale toggle */
+        .scale-toggle {
+            display: flex;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 5px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .scale-toggle button {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.45);
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.72rem;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            letter-spacing: 0.3px;
+        }
+        .scale-toggle button.active {
+            background: rgba(255,107,107,0.18);
+            color: #ff8787;
+        }
+        .scale-toggle button:hover:not(.active) {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.75);
+        }
+
+        /* Horizon slider */
+        #slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex: 1;
+            min-width: 180px;
+        }
+        #slider-wrap label {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.42);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        #horizon-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.12);
+            outline: none;
+            cursor: pointer;
+        }
+        #horizon-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 13px; height: 13px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            border: 2px solid #1a1a1a;
+            box-shadow: 0 0 6px rgba(255,107,107,0.5);
+            cursor: pointer;
+        }
+        #horizon-slider::-moz-range-thumb {
+            width: 13px; height: 13px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            border: 2px solid #1a1a1a;
+            cursor: pointer;
+        }
+        #slider-val {
+            font-size: 0.72rem;
+            color: #ff8787;
+            width: 52px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        /* Tooltip */
+        #tooltip {
+            position: fixed;
+            pointer-events: none;
+            background: rgba(8,8,12,0.97);
+            border: 1px solid rgba(255,107,107,0.3);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 0.77rem;
+            line-height: 1.55;
+            color: #fff;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            max-width: 220px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,107,107,0.08);
+        }
+        #tooltip .tt-name { font-weight: 500; color: #ff8787; margin-bottom: 4px; font-size: 0.81rem; }
+        #tooltip .tt-row { color: rgba(255,255,255,0.6); }
+        #tooltip .tt-row span { color: #fff; font-weight: 500; }
+
+        /* Legend */
+        #legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px 14px;
+            margin-top: 12px;
+            padding-left: 58px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.55);
+            padding: 3px 7px;
+            border-radius: 4px;
+            transition: color 0.13s, background 0.13s;
+        }
+        .legend-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.05); }
+        .legend-item.muted { opacity: 0.28; }
+        .legend-swatch { width: 20px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+
+        /* Chart source */
+        .chart-source {
+            font-size: 0.67rem;
+            color: rgba(255,255,255,0.25);
+            margin-top: 10px;
+            padding-left: 58px;
+        }
+
+        /* SVG */
+        .axis text { font-family: 'Rubik', sans-serif; font-size: 10.5px; fill: rgba(255,255,255,0.42); }
+        .axis path, .axis line { stroke: rgba(255,255,255,0.13); }
+
+        .point-label {
+            font-family: 'Rubik', sans-serif;
+            font-size: 10px;
+            fill: rgba(255,255,255,0.6);
+            pointer-events: none;
+        }
+        .point-label-pinned { fill: rgba(255,255,255,0.88); }
+
+        /* Mythos animations */
+        @keyframes mythos-pulse {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #ff6b6b) drop-shadow(0 0 12px rgba(255,107,107,0.45)); }
+            50%       { opacity: 0.5; filter: drop-shadow(0 0 1px #ff6b6b); }
+        }
+        .mythos-dot { animation: mythos-pulse 2.2s ease-in-out infinite; }
+
+        @keyframes mythos-ring {
+            0%    { opacity: 0.3; stroke-width: 1.5; }
+            100%  { opacity: 0;   stroke-width: 0.3; }
+        }
+        .mythos-ring {
+            fill: none; stroke: #ff6b6b;
+            animation: mythos-ring 2.2s ease-out infinite;
+            pointer-events: none;
+        }
+
+        .fit-line { fill: none; stroke-linecap: round; }
+    </style>
+</head>
+<body>
+<div id="chart-container">
+    <div class="chart-title">AI Task Horizon Length — METR Benchmark</div>
+    <div class="chart-subtitle" id="chart-subtitle">Hours of autonomous work AI agents can complete (p80) · Click points to label · Click legend to toggle</div>
+
+    <div id="controls">
+        <div class="scale-toggle">
+            <button id="btn-linear">Linear</button>
+            <button id="btn-log" class="active">Log</button>
+        </div>
+        <div class="scale-toggle">
+            <button id="btn-p80" class="active">p80</button>
+            <button id="btn-p50">p50</button>
+        </div>
+        <div id="slider-wrap">
+            <label>Zoom horizon:</label>
+            <input type="range" id="horizon-slider" min="0" max="4" step="1" value="0">
+            <span id="slider-val">data only</span>
+        </div>
+    </div>
+
+    <svg id="chart"></svg>
+    <div id="legend"></div>
+    <div class="chart-source">Source: METR-Horizon-v1.1 &nbsp;·&nbsp; p50_horizon_length estimates &nbsp;·&nbsp; Projections are illustrative scenarios</div>
+</div>
+<div id="tooltip"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const rawData = [
+  //                                                                                               p50 CI                              p80 CI
+  { key: "gpt2",                                label: "GPT-2",               date: "2019-02-14", p50: 0.053778,   p50Lo: 0.009994,  p50Hi: 0.141825,  p80: 0.0128,    p80Lo: 0.001589,  p80Hi: 0.068612,  isMythos: false },
+  { key: "davinci_002",                          label: "GPT-3 (davinci)",     date: "2020-05-28", p50: 0.144057,   p50Lo: 0.093319,  p50Hi: 0.221209,  p80: 0.056238,  p80Lo: 0.034813,  p80Hi: 0.105813,  isMythos: false },
+  { key: "gpt_3_5_turbo_instruct",              label: "GPT-3.5 Turbo",       date: "2022-03-15", p50: 0.599247,   p50Lo: 0.255148,  p50Hi: 1.115905,  p80: 0.25538,   p80Lo: 0.141649,  p80Hi: 0.492933,  isMythos: false },
+  { key: "gpt_4",                               label: "GPT-4",               date: "2023-03-14", p50: 3.987428,   p50Lo: 1.93292,   p50Hi: 7.995283,  p80: 0.889561,  p80Lo: 0.342984,  p80Hi: 2.523746,  isMythos: false },
+  { key: "gpt_4_1106_inspect",                  label: "GPT-4 Turbo",         date: "2023-11-06", p50: 4.044959,   p50Lo: 1.866859,  p50Hi: 8.443226,  p80: 0.783032,  p80Lo: 0.276599,  p80Hi: 2.358414,  isMythos: false },
+  { key: "claude_3_opus_inspect",               label: "Claude 3 Opus",       date: "2024-03-04", p50: 3.952262,   p50Lo: 1.706313,  p50Hi: 8.76484,   p80: 0.638973,  p80Lo: 0.190491,  p80Hi: 2.118276,  isMythos: false },
+  { key: "gpt_4_turbo_inspect",                 label: "GPT-4 Turbo (Apr)",   date: "2024-04-09", p50: 3.732787,   p50Lo: 1.980046,  p50Hi: 6.736613,  p80: 0.927933,  p80Lo: 0.428277,  p80Hi: 2.196806,  isMythos: false },
+  { key: "gpt_4o_inspect",                      label: "GPT-4o",              date: "2024-05-13", p50: 6.991195,   p50Lo: 4.001482,  p50Hi: 12.905741, p80: 1.267009,  p80Lo: 0.562997,  p80Hi: 3.01517,   isMythos: false },
+  { key: "claude_3_5_sonnet_20240620_inspect",  label: "Claude 3.5 Sonnet",   date: "2024-06-20", p50: 11.395377,  p50Lo: 5.489734,  p50Hi: 22.384214, p80: 1.671757,  p80Lo: 0.57927,   p80Hi: 4.573519,  isMythos: false },
+  { key: "o1_preview",                          label: "o1-preview",          date: "2024-09-12", p50: 20.326586,  p50Lo: 11.716193, p50Hi: 33.379877, p80: 4.420545,  p80Lo: 2.012646,  p80Hi: 8.912444,  isMythos: false },
+  { key: "claude_3_5_sonnet_20241022_inspect",  label: "Claude 3.5 Sonnet v2",date: "2024-10-22", p50: 20.522872,  p50Lo: 10.144026, p50Hi: 40.82028,  p80: 2.595677,  p80Lo: 0.89379,   p80Hi: 7.363864,  isMythos: false },
+  { key: "o1_inspect",                          label: "o1",                  date: "2024-12-05", p50: 38.831588,  p50Lo: 21.164512, p50Hi: 64.95249,  p80: 7.090121,  p80Lo: 3.036033,  p80Hi: 16.640636, isMythos: false },
+  { key: "claude_3_7_sonnet_inspect",           label: "Claude 3.7 Sonnet",   date: "2025-02-24", p50: 60.388937,  p50Lo: 33.006168, p50Hi: 104.226017,p80: 12.09179,  p80Lo: 4.575608,  p80Hi: 28.889879, isMythos: false },
+  { key: "o3_inspect",                          label: "o3",                  date: "2025-04-16", p50: 119.732634, p50Lo: 74.615398, p50Hi: 190.943818,p80: 29.981603, p80Lo: 15.127348, p80Hi: 57.823511, isMythos: false },
+  { key: "claude_4_opus_inspect",               label: "Claude 4 Opus",       date: "2025-05-22", p50: 100.366123, p50Lo: 59.994073, p50Hi: 163.454074,p80: 20.429752, p80Lo: 8.483125,  p80Hi: 41.937268, isMythos: false },
+  { key: "claude_4_1_opus_inspect",             label: "Claude 4.1 Opus",     date: "2025-08-05", p50: 100.472004, p50Lo: 59.272391, p50Hi: 159.451918,p80: 23.455761, p80Lo: 10.538456, p80Hi: 47.785951, isMythos: false },
+  { key: "gpt_5_2025_08_07_inspect",            label: "GPT-5",               date: "2025-08-07", p50: 203.012577, p50Lo: 112.641357,p50Hi: 405.551565,p80: 38.312431, p80Lo: 19.184874, p80Hi: 70.093125, isMythos: false },
+  { key: "gemini_3_pro",                        label: "Gemini 3 Pro",        date: "2025-11-18", p50: 224.325884, p50Lo: 139.565157,p50Hi: 379.235434,p80: 54.142849, p80Lo: 25.650451, p80Hi: 103.295501,isMythos: false },
+  { key: "gpt_5_1_codex_max_inspect",           label: "GPT-5.1 Codex Max",   date: "2025-11-19", p50: 223.714694, p50Lo: 134.31077, p50Hi: 396.206723,p80: 50.632499, p80Lo: 27.30204,  p80Hi: 88.365435, isMythos: false },
+  { key: "claude_opus_4_5_inspect",             label: "Claude Opus 4.5",     date: "2025-11-24", p50: 292.994594, p50Lo: 161.717714,p50Hi: 623.704698,p80: 49.430584, p80Lo: 20.660485, p80Hi: 104.641318,isMythos: false },
+  { key: "gpt_5_2",                             label: "GPT-5.2",             date: "2025-12-11", p50: 352.249302, p50Lo: 198.067494,p50Hi: 815.177445,p80: 66.002649, p80Lo: 31.665111, p80Hi: 131.730719,isMythos: false },
+  { key: "claude_opus_4_6_inspect",             label: "Claude Opus 4.6",     date: "2026-02-05", p50: 718.80683,  p50Lo: 316.685725,p50Hi: 3633.786163,p80: 69.874587, p80Lo: 27.026521, p80Hi: 170.437873,isMythos: false },
+  { key: "gpt_5_3_codex",                       label: "GPT-5.3 Codex",       date: "2026-02-05", p50: 349.530732, p50Lo: 194.913134,p50Hi: 816.351994,p80: 54.739407, p80Lo: 22.361504, p80Hi: 122.058963,isMythos: false },
+  { key: "gemini_3_1_pro",                      label: "Gemini 3.1 Pro",      date: "2026-02-19", p50: 384.147435, p50Lo: 233.50073, p50Hi: 694.750898,p80: 89.801503, p80Lo: 52.025934, p80Hi: 158.618017,isMythos: false },
+  { key: "gpt_5_4",                             label: "GPT-5.4",             date: "2026-03-05", p50: 341.735276, p50Lo: 186.581591,p50Hi: 768.779526,p80: 53.877851, p80Lo: 23.957027, p80Hi: 108.679232,isMythos: false },
+  { key: "claude_mythos_preview_early_inspect", label: "Mythos",              date: "2026-04-07", p50: 1044.780145,p50Lo: 508.876789,p50Hi: 3304.261235,p80: 185.911829,p80Lo: 97.30292,  p80Hi: 398.514614,isMythos: true  },
+];
+
+const parseDate = d3.timeParse("%Y-%m-%d");
+const data = rawData.map(d => ({ ...d, dateObj: parseDate(d.date) }))
+                    .sort((a, b) => a.dateObj - b.dateObj);
+
+// ─── DEFAULT LABELS ───────────────────────────────────────────────────────────
+const defaultLabels = new Set([
+  "gpt2", "gpt_4", "o1_inspect",
+  "claude_3_7_sonnet_inspect", "claude_mythos_preview_early_inspect",
+]);
+const pinnedLabels = new Set(defaultLabels);
+
+// ─── SHARED CONSTANTS ────────────────────────────────────────────────────────
+function daysSince(d, epoch = new Date("2019-01-01")) {
+  return (d - epoch) / 86400000;
+}
+const lastDate = data[data.length - 1].dateObj;
+
+// Regression + projections are recomputed inside buildChart (depend on useP80)
+
+// ─── HORIZON SLIDER CONFIG ───────────────────────────────────────────────────
+// Steps: 0=now (just past Mythos), then zoom out
+const horizonSteps = [
+  { end: "2026-08-01", label: "data only" },
+  { end: "2028-01-01", label: "to 2028" },
+  { end: "2030-01-01", label: "to 2030" },
+  { end: "2032-01-01", label: "to 2032" },
+  { end: "2036-01-01", label: "to 2036" },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let useLog = true;
+let useP80 = true;
+let horizonStep = 0;
+const seriesState = { fit: true, mod: true, sig: true, band: false };
+
+// ─── CONTROLS WIRING ─────────────────────────────────────────────────────────
+document.getElementById("btn-linear").addEventListener("click", () => {
+  useLog = false;
+  document.getElementById("btn-linear").classList.add("active");
+  document.getElementById("btn-log").classList.remove("active");
+  buildChart();
+});
+document.getElementById("btn-log").addEventListener("click", () => {
+  useLog = true;
+  document.getElementById("btn-log").classList.add("active");
+  document.getElementById("btn-linear").classList.remove("active");
+  buildChart();
+});
+document.getElementById("btn-p80").addEventListener("click", () => {
+  useP80 = true;
+  document.getElementById("btn-p80").classList.add("active");
+  document.getElementById("btn-p50").classList.remove("active");
+  buildChart();
+});
+document.getElementById("btn-p50").addEventListener("click", () => {
+  useP80 = false;
+  document.getElementById("btn-p50").classList.add("active");
+  document.getElementById("btn-p80").classList.remove("active");
+  buildChart();
+});
+
+const sliderEl = document.getElementById("horizon-slider");
+const sliderVal = document.getElementById("slider-val");
+sliderEl.addEventListener("input", () => {
+  horizonStep = +sliderEl.value;
+  sliderVal.textContent = horizonSteps[horizonStep].label;
+
+  buildChart();
+});
+
+// ─── PERCENTILE ACCESSOR ─────────────────────────────────────────────────────
+function pVal(d)  { return useP80 ? d.p80   : d.p50;   }
+function pLo(d)   { return useP80 ? d.p80Lo : d.p50Lo; }
+function pHi(d)   { return useP80 ? d.p80Hi : d.p50Hi; }
+
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+function formatHours(h) {
+  if (h < 1/30)  return (h * 60).toFixed(1) + " min";
+  if (h < 2)     return h.toFixed(2) + " hrs";
+  if (h < 48)    return h.toFixed(1) + " hrs";
+  if (h < 500)   return (h / 24).toFixed(1) + " days";
+  if (h < 8760)  return (h / 168).toFixed(1) + " wks";
+  return (h / 8760).toFixed(1) + " yrs";
+}
+
+function linspace(a, b, n) {
+  return Array.from({ length: n }, (_, i) => new Date(a + (b - a) * i / (n - 1)));
+}
+
+// ─── MARGIN ──────────────────────────────────────────────────────────────────
+const margin = { top: 14, right: 36, bottom: 44, left: 58 };
+
+// ─── BUILD ───────────────────────────────────────────────────────────────────
+function buildChart() {
+  // ── Recompute regression for current percentile ──
+  const fitPts = data.map(d => ({ x: daysSince(d.dateObj), logy: Math.log(pVal(d)) }));
+  const N   = fitPts.length;
+  const sx  = fitPts.reduce((s, p) => s + p.x, 0);
+  const sy  = fitPts.reduce((s, p) => s + p.logy, 0);
+  const sxy = fitPts.reduce((s, p) => s + p.x * p.logy, 0);
+  const sx2 = fitPts.reduce((s, p) => s + p.x * p.x, 0);
+  const slope     = (N * sxy - sx * sy) / (N * sx2 - sx * sx);
+  const intercept = (sy - slope * sx) / N;
+
+  function expFit(date)     { return Math.exp(intercept + slope * daysSince(date)); }
+  function moderateExp(date){ return expFit(date); }
+  function sigmoid(date) {
+    const L  = useP80 ? 800 : 4800;
+    const y0 = expFit(lastDate);
+    const dx = daysSince(date) - daysSince(lastDate);
+    const k  = slope * 0.85;
+    return L / (1 + ((L - y0) / y0) * Math.exp(-k * dx));
+  }
+
+  const container = document.getElementById("chart-container");
+  const totalW = container.clientWidth;
+  const width  = totalW - margin.left - margin.right;
+  const height = Math.min(Math.max(width * 0.5, 240), 390);
+
+  const endDate   = new Date(horizonSteps[horizonStep].end);
+  const startDate = new Date("2019-01-01");
+
+  // Projection curve points (smooth, 200 steps)
+  const projCurveDates = linspace(lastDate.getTime(), endDate.getTime(), 200);
+
+  // X domain: always 2019 → chosen end
+  const xDomain = [startDate, endDate];
+
+  // Compute y-domain dynamically based on what's visible
+  // Include all data points + projection curve values within x domain
+  const visibleData = data.filter(d => d.dateObj <= endDate);
+  const projVals = [
+    ...projCurveDates.map(moderateExp),
+    ...projCurveDates.map(sigmoid),
+  ].filter(v => isFinite(v) && v > 0);
+
+  const allVals = [
+    ...visibleData.map(d => pHi(d)),
+    ...projVals,
+  ].filter(v => isFinite(v) && v > 0);
+
+  const yMax = Math.max(...allVals);
+  const yMin = useLog ? Math.min(...visibleData.map(d => pLo(d)).filter(v => v > 0)) * 0.5
+                      : 0;
+
+  // For linear scale, cap so the early points aren't totally squished
+  const yMaxLinear = useLog ? yMax * 1.15 : yMax * 1.1;
+
+  const svg = d3.select("#chart")
+    .attr("width", totalW)
+    .attr("height", height + margin.top + margin.bottom);
+  svg.selectAll("*").remove();
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // ── Scales ──
+  const x = d3.scaleTime().domain(xDomain).range([0, width]);
+
+  let y;
+  if (useLog) {
+    const logMin = Math.max(yMin, 0.005);
+    y = d3.scaleLog().domain([logMin, yMaxLinear]).range([height, 0]).clamp(true);
+  } else {
+    y = d3.scaleLinear().domain([0, yMaxLinear]).range([height, 0]);
+  }
+
+  // ── Clip path ──
+  const uid = "clip-" + Math.random().toString(36).slice(2);
+  g.append("defs").append("clipPath").attr("id", uid)
+    .append("rect").attr("width", width).attr("height", height);
+  const clipped = g.append("g").attr("clip-path", `url(#${uid})`);
+
+  // ── Grids ──
+  // Horizontal
+  const yTicks = useLog
+    ? [0.01, 0.1, 1, 10, 100, 1000, 10000, 100000].filter(v => v >= (useLog ? 0.005 : 0) && v <= yMaxLinear * 1.2)
+    : y.ticks(6);
+
+  clipped.append("g").selectAll("line").data(yTicks).join("line")
+    .attr("x1", 0).attr("x2", width)
+    .attr("y1", d => y(d)).attr("y2", d => y(d))
+    .attr("stroke", "rgba(255,255,255,0.05)").attr("stroke-dasharray", "2,4");
+
+  // Vertical (years)
+  clipped.append("g").selectAll("line")
+    .data(x.ticks(d3.timeYear.every(1))).join("line")
+    .attr("x1", d => x(d)).attr("x2", d => x(d))
+    .attr("y1", 0).attr("y2", height)
+    .attr("stroke", "rgba(255,255,255,0.04)").attr("stroke-dasharray", "2,4");
+
+  // ── Reference lines (hours → human-readable anchors) ──
+  const refs = [
+    { h: 1/60,   lbl: "1 min" },
+    { h: 1,      lbl: "1 hr" },
+    { h: 8,      lbl: "1 day (8 hrs)" },
+    { h: 40,     lbl: "1 week (40 hrs)" },
+    { h: 160,    lbl: "1 month" },
+    { h: 2000,   lbl: "1 year" },
+    { h: 20000,  lbl: "10 years" },
+  ];
+  refs.forEach(r => {
+    if (!useLog && r.h < 1) return; // skip sub-1hr refs on linear — they'd all be at y≈0
+    const yv = y(r.h);
+    if (yv < 0 || yv > height) return;
+    clipped.append("line")
+      .attr("x1", 0).attr("x2", width)
+      .attr("y1", yv).attr("y2", yv)
+      .attr("stroke", "rgba(255,255,255,0.08)").attr("stroke-dasharray", "3,5");
+    g.append("text")
+      .attr("x", width + margin.right - 2)
+      .attr("y", yv + 3.5)
+      .attr("text-anchor", "end")
+      .attr("font-family", "Rubik, sans-serif")
+      .attr("font-size", "8.5px")
+      .attr("fill", "rgba(255,255,255,0.2)")
+      .text(r.lbl);
+  });
+
+  // ── CI area band ──
+  const ciArea = d3.area()
+    .x(d  => x(d.dateObj))
+    .y0(d => y(useLog ? Math.max(pLo(d), 0.005) : Math.max(pLo(d), 0)))
+    .y1(d => y(useLog ? Math.min(pHi(d), yMaxLinear) : Math.min(pHi(d), yMaxLinear)))
+    .defined(d => d.dateObj <= endDate)
+    .curve(d3.curveCatmullRom.alpha(0.5));
+
+  clipped.append("path")
+    .datum(data)
+    .attr("fill", "#ff6b6b").attr("opacity", 0.07)
+    .attr("d", ciArea);
+
+  // ── Fit line (historical trend through observed data) ──
+  const fitDatesArr = linspace(startDate.getTime(), Math.min(lastDate.getTime(), endDate.getTime()), 120);
+  if (seriesState.fit) {
+    const fitLine = d3.line()
+      .x(d => x(d))
+      .y(d => y(Math.max(expFit(d), useLog ? 0.005 : 0)))
+      .defined(d => {
+        const v = expFit(d);
+        return isFinite(v) && v > 0 && (useLog ? v >= 0.005 : v >= 0) && v <= yMaxLinear * 2;
+      })
+      .curve(d3.curveCatmullRom);
+    clipped.append("path")
+      .datum(fitDatesArr)
+      .attr("class", "fit-line")
+      .attr("stroke", "rgba(255,255,255,0.3)").attr("stroke-width", 1.5)
+      .attr("d", fitLine);
+  }
+
+  // ── Projection lines ──
+  function drawProj(fn, color, id) {
+    if (!seriesState[id]) return;
+    const lineFn = d3.line()
+      .x(d => x(d))
+      .y(d => {
+        const v = fn(d);
+        if (!isFinite(v) || v <= 0) return null;
+        return y(useLog ? Math.max(v, 0.005) : Math.max(v, 0));
+      })
+      .defined(d => {
+        const v = fn(d);
+        return isFinite(v) && v > 0 && v <= yMaxLinear * 1.05 && d <= endDate;
+      })
+      .curve(d3.curveCatmullRom);
+    clipped.append("path")
+      .datum(projCurveDates)
+      .attr("class", "fit-line")
+      .attr("stroke", color).attr("stroke-width", 1.8)
+      .attr("stroke-dasharray", "6,4").attr("opacity", 0.82)
+      .attr("d", lineFn);
+  }
+
+  // ── Plausible range band (sigmoid lower bound → moderate exponential upper bound) ──
+  if (seriesState.band) {
+    const bandArea = d3.area()
+      .x(d => x(d))
+      .y0(d => {
+        const v = sigmoid(d);
+        return y(useLog ? Math.max(v, 0.005) : Math.max(v, 0));
+      })
+      .y1(d => {
+        const v = moderateExp(d);
+        return y(useLog ? Math.max(v, 0.005) : Math.max(v, 0));
+      })
+      .defined(d => {
+        const lo = sigmoid(d), hi = moderateExp(d);
+        return isFinite(lo) && isFinite(hi) && lo > 0 && hi > 0
+          && hi <= yMaxLinear * 1.05 && d <= endDate;
+      })
+      .curve(d3.curveCatmullRom);
+    clipped.append("path")
+      .datum(projCurveDates)
+      .attr("fill", "#4fc3f7").attr("opacity", 0.10)
+      .attr("d", bandArea);
+  }
+
+  drawProj(moderateExp, "#4fc3f7", "mod");
+  drawProj(sigmoid,     "#a5d6a7", "sig");
+
+  // ── Axes ──
+  const xTickEvery = horizonStep >= 4 ? 2 : 1;
+  const xAxis = d3.axisBottom(x)
+    .ticks(d3.timeYear.every(xTickEvery))
+    .tickFormat(d3.timeFormat("%Y"))
+    .tickSize(4);
+
+  let yAxis;
+  if (useLog) {
+    yAxis = d3.axisLeft(y)
+      .tickValues(yTicks)
+      .tickFormat(d => {
+        if (d >= 1e4) return (d/1000).toFixed(0) + "k";
+        if (d >= 1e3) return (d/1000).toFixed(0) + "k";
+        if (d < 1)    return d.toFixed(2);
+        return d + "";
+      })
+      .tickSize(4);
+  } else {
+    yAxis = d3.axisLeft(y)
+      .ticks(6)
+      .tickFormat(d => {
+        if (d >= 1e6) return (d/1e6).toFixed(0) + "M hrs";
+        if (d >= 1e3) return (d/1000).toFixed(0) + "k hrs";
+        if (d === 0)  return "0";
+        return d + " hrs";
+      })
+      .tickSize(4);
+  }
+
+  g.append("g").attr("class", "axis x-axis")
+    .attr("transform", `translate(0,${height})`).call(xAxis)
+    .call(ax => ax.select(".domain").attr("stroke", "rgba(255,255,255,0.13)"));
+
+  g.append("g").attr("class", "axis y-axis").call(yAxis)
+    .call(ax => ax.select(".domain").attr("stroke", "rgba(255,255,255,0.13)"));
+
+  // Y label
+  g.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2).attr("y", -46)
+    .attr("text-anchor", "middle")
+    .attr("font-family", "Rubik, sans-serif").attr("font-size", "9.5px")
+    .attr("fill", "rgba(255,255,255,0.3)")
+    .text(`Task horizon — hours ${useP80 ? "(p80)" : "(p50)"} · ${useLog ? "log scale" : "linear scale"}`);
+
+  // Update subtitle
+  document.getElementById("chart-subtitle").textContent =
+    `Hours of autonomous work AI agents can complete (${useP80 ? "p80" : "p50"}) · Click points to label · Click legend to toggle`;
+
+  // ── Observed / projected annotation ──
+  if (lastDate < endDate) {
+    const projX = x(lastDate);
+    clipped.append("line")
+      .attr("x1", projX).attr("x2", projX)
+      .attr("y1", 0).attr("y2", height)
+      .attr("stroke", "rgba(255,255,255,0.11)").attr("stroke-dasharray", "4,4");
+    g.append("text")
+      .attr("x", projX + 5).attr("y", 11)
+      .attr("font-family", "Rubik, sans-serif").attr("font-size", "8.5px")
+      .attr("fill", "rgba(255,255,255,0.2)")
+      .text("← data  ·  projected →");
+  }
+
+  // ── Tooltip ──
+  const tooltip = document.getElementById("tooltip");
+
+  // ── Labels helper ──
+  function showLabel(group, d, cx, cy, pinned) {
+    group.selectAll(`.lbl-${CSS.escape(d.key)}`).remove();
+    const cls = `point-label lbl-${d.key}${pinned ? " point-label-pinned" : ""}`;
+    const lbl = group.append("text")
+      .attr("class", cls)
+      .attr("x", cx + 8).attr("y", cy - 6)
+      .attr("pointer-events", "none")
+      .text(d.label);
+    if (cy < 20) lbl.attr("y", cy + 15);
+    if (cx > width - 80) lbl.attr("x", cx - 8).attr("text-anchor", "end");
+  }
+
+  // ── Points ──
+  const pointsGroup = clipped.append("g").attr("class", "points");
+
+  data.forEach(d => {
+    if (d.dateObj > endDate) return;
+
+    const cx = x(d.dateObj);
+    const yval = useLog ? Math.max(pVal(d), 0.005) : Math.max(pVal(d), 0);
+    const cy = y(yval);
+    if (cy < 0 || cy > height) return;
+
+    const r = d.isMythos ? 5 : 3;
+
+    if (d.isMythos) {
+      pointsGroup.append("circle")
+        .attr("class", "mythos-ring")
+        .attr("cx", cx).attr("cy", cy).attr("r", 11)
+        .attr("stroke", "#ff6b6b").attr("stroke-width", 1.5);
+      pointsGroup.append("circle")
+        .attr("class", "mythos-ring")
+        .attr("cx", cx).attr("cy", cy).attr("r", 16)
+        .attr("stroke", "#ff6b6b").attr("stroke-width", 0.8)
+        .style("animation-delay", "0.5s");
+    }
+
+    const circle = pointsGroup.append("circle")
+      .attr("class", d.isMythos ? "data-point mythos-dot" : "data-point")
+      .attr("cx", cx).attr("cy", cy).attr("r", r)
+      .attr("fill", "#ff6b6b")
+      .attr("stroke", d.isMythos ? "#fff" : "rgba(255,255,255,0.45)")
+      .attr("stroke-width", d.isMythos ? 1.5 : 0.8)
+      .style("cursor", "pointer");
+
+    if (pinnedLabels.has(d.key)) {
+      showLabel(pointsGroup, d, cx, cy, true);
+    }
+
+    circle
+      .on("mousemove", function(event) {
+        tooltip.style.opacity = "1";
+        tooltip.innerHTML = `
+          <div class="tt-name">${d.label}</div>
+          <div class="tt-row">Released: <span>${d.date}</span></div>
+          <div class="tt-row">Horizon (${useP80 ? "p80" : "p50"}): <span>${formatHours(pVal(d))}</span></div>
+          <div class="tt-row">95% CI: <span>${formatHours(pLo(d))} – ${formatHours(pHi(d))}</span></div>
+          ${d.isMythos ? '<div style="color:#ff8787;margin-top:5px;font-size:0.72rem">⬤ Current frontier</div>' : ""}
+        `;
+        const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+        const pad = 14;
+        let tx = event.clientX + pad, ty = event.clientY - th / 2;
+        if (tx + tw > window.innerWidth - 8) tx = event.clientX - tw - pad;
+        ty = Math.max(4, Math.min(ty, window.innerHeight - th - 4));
+        tooltip.style.left = tx + "px";
+        tooltip.style.top  = ty + "px";
+      })
+      .on("mouseleave", () => { tooltip.style.opacity = "0"; })
+      .on("click", function() {
+        if (pinnedLabels.has(d.key)) {
+          pinnedLabels.delete(d.key);
+          pointsGroup.selectAll(`.lbl-${CSS.escape(d.key)}`).remove();
+        } else {
+          pinnedLabels.add(d.key);
+          showLabel(pointsGroup, d, cx, cy, true);
+        }
+      });
+  });
+
+  // ── Legend ──
+  const legendDefs = [
+    { key: "fit",  color: "rgba(255,255,255,0.3)", dashed: false, band: false, label: "Observed exponential fit" },
+    { key: "mod",  color: "#4fc3f7",               dashed: true,  band: false, label: "Moderate exponential" },
+    { key: "sig",  color: "#a5d6a7",               dashed: true,  band: false, label: "Sigmoid (plateau ~4,800 hrs)" },
+    { key: "band", color: "#4fc3f7",               dashed: false, band: true,  label: "Plausible range" },
+  ];
+
+  const legendEl = document.getElementById("legend");
+  legendEl.innerHTML = "";
+  legendDefs.forEach(def => {
+    const item = document.createElement("div");
+    item.className = "legend-item" + (seriesState[def.key] ? "" : " muted");
+    item.dataset.key = def.key;
+
+    const sw = document.createElement("div");
+    sw.className = "legend-swatch";
+    if (def.band) {
+      sw.style.background = def.color;
+      sw.style.opacity = "0.35";
+      sw.style.height = "10px";
+      sw.style.borderRadius = "2px";
+    } else if (def.dashed) {
+      sw.style.background = "none";
+      sw.style.borderBottom = `2px dashed ${def.color}`;
+      sw.style.height = "0";
+      sw.style.marginTop = "1px";
+    } else {
+      sw.style.background = def.color;
+    }
+
+    const lbl = document.createElement("span");
+    lbl.textContent = def.label;
+
+    item.appendChild(sw);
+    item.appendChild(lbl);
+    legendEl.appendChild(item);
+
+    item.addEventListener("click", () => {
+      seriesState[def.key] = !seriesState[def.key];
+      buildChart();
+    });
+  });
+}
+
+// ── Initial render ──
+buildChart();
+
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(buildChart, 80);
+});
+</script>
+</body>
+</html>
