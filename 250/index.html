@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Case for the American Experiment in a Decade of Algorithms and Autocratization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container { width: 100%; max-width: 700px; }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: none;
+            position: relative;
+            display: inline;
+            transition: all 0.3s ease;
+        }
+        a:hover { animation: glitch 0.3s ease; }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0.02em 0 0 rgba(255,0,0,.75), -0.02em 0 0 rgba(0,255,0,.75), 0.025em 0.05em 0 rgba(0,0,255,.75); }
+            15%      { text-shadow: 0.5em 0 0 rgba(255,0,0,.75), -0.5em 0 0 rgba(0,255,0,.75), 0.25em 0.05em 0 rgba(0,0,255,.75); }
+            50%      { text-shadow: -0.02em 0.02em 0 rgba(255,0,0,.75), 0.02em -0.02em 0 rgba(0,255,0,.75), -0.025em 0.05em 0 rgba(0,0,255,.75); }
+        }
+
+        .header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        .header .byline {
+            opacity: 0.6;
+            font-size: 0.95rem;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.4rem; }
+        }
+
+        section { margin-bottom: 50px; }
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+        p { margin-bottom: 16px; line-height: 1.7; }
+        ul, ol {
+            padding-left: 1.4em;
+            margin-bottom: 16px;
+        }
+        li { margin-bottom: 12px; line-height: 1.7; }
+        strong { font-weight: 600; }
+
+        blockquote {
+            border-left: 2px solid rgba(255,107,107,0.4);
+            padding-left: 18px;
+            margin: 20px 0;
+            opacity: 0.85;
+            font-style: italic;
+        }
+        blockquote p { margin-bottom: 12px; }
+        blockquote p:last-child { margin-bottom: 0; }
+
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.10);
+            margin-bottom: 50px;
+        }
+
+        .chart-embed {
+            margin: 32px -20px;
+            width: calc(100% + 40px);
+        }
+        .chart-embed iframe {
+            width: 100%;
+            height: 420px;
+            border: none;
+            border-radius: 8px;
+            background: #1a1a1a;
+            display: block;
+        }
+        .chart-embed.tall iframe { height: 560px; }
+        @media (max-width: 600px) {
+            .chart-embed { margin: 24px -12px; width: calc(100% + 24px); }
+            .chart-embed iframe { height: 380px; }
+            .chart-embed.tall iframe { height: 480px; }
+            .chart-embed.regimes iframe { height: 435px; }
+        }
+
+        .claude-signature {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+        .claude-signature a {
+            color: #ffffff;
+            font-size: 0.75rem;
+        }
+        .claude-signature a:hover {
+            animation: none;
+            text-shadow: none;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>The Case for the American Experiment in a Decade of Algorithms and Autocratization</h1>
+            <p class="byline">Severin Field</p>
+        </div>
+        <hr class="divider">
+
+        <section>
+            <p>Over the last few weeks I've read the Constitution, Declaration of Independence, and many of the Federalist papers. These documents are devoted to preventing failure modes of governance: concentration of power, e.g. a small faction locking in control and suppressing opposition, ideological fanaticism, foreign powers destabilizing and destroying a nation from within. These failure modes are the very motivations for the United States; the separation of power, federalism, checks and balances, and the rule of law. Concentrated power has been a default throughout history, and improbable arrangements like democracies may need constant pressure to avoid collapse into this mode. Just like the energy exerted by a cell to maintain its barrier, to avoid succumbing to entropy, we may have to push hard to preserve what we love.</p>
+
+            <div class="chart-embed">
+                <iframe src="eagle-flag-d.html" title="Slow-Scan — the American flag and bald eagle painted line by line, decaying into static until the beam redraws them" scrolling="no" frameborder="0" style="height: 365px;"></iframe>
+            </div>
+
+            <p>We may soon develop AI that could do most tasks that humans do (and probably therefore produce most of the value in the economy), make decisions, accelerate R&amp;D, and generally out-think humans. Perhaps soon after, civilization will ascend towards the stars. It is very difficult to predict precisely what this will look like. Moreover, I do not know which values, principles and governance protocols we ought to take with us. But among the civilizations on offer, amid democratic backsliding abroad and even at home, American democracy remains the least bad option we have.</p>
+        </section>
+
+        <section>
+            <h2>What We Have to Lose</h2>
+            <p>Last year today, <a href="https://blog.peterwildeford.com/p/american-ideals-matter-in-an-age" target="_blank">Peter Wildeford wrote a blog</a> that steered my politics. He said:</p>
+            <blockquote>
+                <p>The work of the Declaration is incomplete. The world faces a renewed contest between freedom and tyranny. Authoritarian powers are continuing to perfect digital surveillance states and launch new wars of conquest. Most concerningly, this is all happening while many Americans struggle to see the difference between their own flawed democracy and the totalitarian alternatives rising across the globe.</p>
+                <p>This is more than just an unfortunate confusion and failure of perspective. Such "whataboutism" and false equivalence is a threat to the very foundations of liberal democracy when clarity about our values matters most.</p>
+            </blockquote>
+            <p>Since Peter wrote those words, the Iranian state has executed at least 2,159 people (Amnesty International), followed by a documented mass killing of protesters this January with death tolls estimated between thousands to tens of thousands. During protests, the <a href="https://en.wikipedia.org/wiki/2026_Internet_blackout_in_Iran" target="_blank">Islamic Republic cut the entire country off from the internet for 5 months</a> to conceal killings and prevent coordination.</p>
+            <p>This year, Russia has doubled down on its unnecessary war of aggression against Ukraine. Many reliable estimates approximate the war as having cost two million casualties thus far. Hundreds of thousands of men my age, who did nothing wrong besides being born in the wrong country, have been killed in the name of territorial gain and "denazification." At home, Putin has transformed Russia's government into a <a href="https://www.foreignaffairs.com/articles/russia-fsu/2016-04-18/russian-politics-under-putin" target="_blank">mafia state</a>. Opposition leaders face imprisonment or assassination. Independent media has been destroyed. The government bans internet access to any Western websites (e.g. Google, ChatGPT, etc.) to keep its people in the dark and distort the nature of the conflict. To maintain the great lie, <a href="https://www.hrw.org/news/2023/03/09/russia-wartime-repression-ukraine-war-dissent" target="_blank">anti-war sentiments can land Russians years in prison</a>.</p>
+            <p>In China, the Chinese Communist Party (CCP) hones the efficiency of the most advanced surveillance apparatus ever built. The CCP also engages in cultural genocide, while using a great information firewall to prevent any information from coming in or getting out about it. According to the <a href="http://t.co/gHK9ZS38Vx" target="_blank">financial times</a>:</p>
+            <ul>
+                <li>~90% of children are taken from parents to be educated in boarding schools where they aren't allowed to speak Uyghur</li>
+                <li>Officials monitor who eats during Ramadan and report those who skip meals</li>
+                <li>Basic items like prayer mats and religious text are considered illegal contraband</li>
+                <li>Adult Uyghur women are pressured to marry Han Chinese men, and there are official goals to sterilize a certain % of them</li>
+                <li>The CCP has shut down all existing publishers that publish in the Uyghur language</li>
+            </ul>
+            <p>In each of these countries, a single party, fanatical ideology, or autocrat has concentrated power, suppressed opposition, sealed the information ecosystem and entrenched power; succumbing to the failure modes that motivated the founding fathers.</p>
+            <p>These states are built on vastly different ideologies: fundamental Islamism in Iran, imperial ethno-nationalism in Russia, CCP party supremacy in China. We might expect these states to operate very differently from one another, yet they share striking similarities. <a href="https://forum.effectivealtruism.org/posts/EDBQPT65XJsgszwmL/long-term-risks-from-ideological-fanaticism" target="_blank">Ideological fanaticism</a> often has recurring characteristics:</p>
+            <ul>
+                <li>epistemic and moral certainty, as seen in the Iranian regimes divinely inspired theocracy, which cannot, by-definition, be wrong</li>
+                <li>extreme tribalism dividing humanity into a sacred "us" and an evil "them"</li>
+                <li>a willingness to use whatever means necessary, including brutal violence.</li>
+            </ul>
+            <p>These states also don't include principles we value in liberal democracies — including mutual toleration (accepting your political opponents as legitimate) and institutional forbearance (self-restraint in using legal powers), or free elections. Russia and China are continental empires in the oldest sense, powers that grew by swallowing and assimilating their neighbors; and none of the three authoritarian powers recognize a minority's right to remain distinct. In contrast, judicial review, supermajority amendments, and the separation of powers were designed to protect minorities from a tyrannical majority.</p>
+            <p>The authoritarian leaders of the world feed on Americans forgetting our own story and our exceptionalism. They hold stakes in American polarization and social instability, the largest predictor of democratic backsliding.</p>
+            <p>States like Russia invest enormously in our social instability; the Russian Internet Research Agency deliberately amplifies the most divisive issues in American politics and supports radical groups, because Chaos is easier to spread than Russian propaganda. In 2016, for example, a pro-muslim rally and anti-muslim counterprotest were organized to occur simultaneously, both organized <a href="https://wisconsinmuslimjournal.org/russian-trolls-orchestrated-2016-clash-at-houston-islamic-center-new-senate-intel-report-recalls/" target="_blank">from Saint Petersburg</a>. <a href="https://en.wikipedia.org/wiki/New_generation_warfare#Gerasimov_doctrine" target="_blank">Cognitive warfare is part of Russian military doctrine</a>; Putin believes wars are won/lost in minds, not on the battlefield. He will have won when we believe nothing, don't trust one another, and no longer tell the difference between our flawed democracy and autocracy. We will have fully lost the future when we've given up on the ability to correct our government at all.</p>
+            <p>America, much more so than China, has the ability to self correct. The examples critics use to draw a false equivalency between the governments turns out to be evidence of this. Innumerable executive branch scandals, including the <a href="https://time.com/3732062/ronald-ridenhour-vietnam-my-lai/" target="_blank">My Lai massacre</a>, the <a href="https://millercenter.org/the-presidency/educational-resources/first-domino-nixon-and-the-pentagon-papers#:~:text=The%20story%20of%20the%20Pentagon,he%20began%20to%20consider%20leaking" target="_blank">Pentagon Papers</a>, the abuses at <a href="https://world.time.com/2013/06/10/10-notorious-leakers-and-how-they-fared/slide/abu-ghraib-photo-leak/#:~:text=Joe%20Darby%2C%20a%20U,publicly%20thanking%20him%20on%20television" target="_blank">Abu Ghraib</a>, and the <a href="https://en.wikipedia.org/wiki/Snowden_disclosures" target="_blank">2013 Snowden leaks</a>, have come to light and catalyzed reforms and accountability because conscientious employees and officers spoke up in one way or another and were able to do so. That we have channels to whistleblow or critique our own government is a virtue of its own that must be defended to stay ahead of demagogues or concentration of power. This type of process is unfortunately less feasible in Beijing, where defiance of party agenda is criminal and would-be whistleblowers of Xinjiang camps are, themselves, in camps.</p>
+        </section>
+
+        <section>
+            <h2>Newfound Pressures Towards Autocratization</h2>
+            <p>Technologies, conditions, and geography (the "geo" in "geopolitics") shape how humans govern through incentives. For example, the "resource curse" is when countries rich in valuable natural resources (e.g. oil, gas, and minerals) counter-intuitively experience slower economic growth, weaker governance, and worse development outcomes than resource-poor nations.</p>
+            <p>There isn't consensus as to why this correlation exists, but I find the Anarchy as Architect explanation among the most plausible: When a technology raises or lowers the marginal value of the median person to the state's competitive fitness, states are incentivized to react accordingly. For example, when states can get their money from resources instead of citizenry, they don't have as much pressure to invest in education — an educated person is just as efficient in a coal mine, but more likely to revolt. On the other hand, if the marginal value of a median person is high, a state benefits from spending resources on education, liberties, healthcare, infrastructure, etc.</p>
+            <p>There are a few reasons I expect near-term AI systems to encourage autocracy over democracy:</p>
+            <p><strong>AGI and the future:</strong> Democracies are largely possible because the state benefits from empowering people and because people can threaten the state (revolt, riot, etc.) should their rights be taken. They can also remain stable by voting out draconian leaders. Similarly, there are strong incentives to empower individuals, because educated, healthy people are more productive. I think these incentives will decrease (or vanish) in many AGI scenarios and straightforwardly decrease with cheaper versions of existing technology already!</p>
+            <p>Technologies alter what types of governments are competitively viable, sometimes for better and sometimes for worse. It isn't difficult to imagine how AI might help concentrate power. AI access is already heavily concentrated, few people can train or deploy AIs, and decisions that steer AI values are in a relatively small number of hands. It may be worth including that it's hard to forecast technological progress, most attempts are wrong, and this one may be too.</p>
+            <p><strong>Legibility increase:</strong> legibility refers to the ability for a state to measure, monitor, and manipulate its people by turning messy/complex systems into understandable ones. For example, mandatory IDs increase legibility because everyone's name can be put in a database and tracked (e.g. makes tax collection easier). Legibility is neither good nor bad necessarily, but does seem to increase the capacity of states relative to individuals. Machine learning and AI technologies are extremely good at parsing enormous amounts of data, perhaps this could be used to measure political loyalty, amp up surveillance, crack down on dissidents or selectively enforce the law.</p>
+            <p><strong>A very small number of people are required to control large numbers of AIs</strong>: Future AIs are likely to not require many people to operate / monitor them (e.g. imagine 100 claude mythos 10 tabs open but the claudes are sifting through texts / videos looking for dissidents). This is straightforwardly downstream from AIs being <em>highly parallelizable</em>. Consider an example from Dwarkesh Patel: "There are 100 million CCTV cameras in America. You can get pretty good open source multimodal models for 10 cents per million input tokens. So if you process a frame every ten seconds, and each frame is 1,000 tokens, you're looking at a yearly cost of about 30 billion dollars to process every single camera in America." (this will get exponentially cheaper)</p>
+            <p><strong>Existing precedent:</strong> the relative share of people living under democracy has <a href="https://ourworldindata.org/democracy" target="_blank">already begun declining</a>, and the democratic world is backsliding according to most measures.</p>
+
+            <div class="chart-embed regimes">
+                <iframe src="democracy-trend-simple.html" title="The Democracy Line — share of the world's countries by regime type, V-Dem via Our World in Data" scrolling="no" frameborder="0"></iframe>
+            </div>
+
+            <p><strong>Social destabilization attacks are more effective against open societies</strong>, and AI will clearly improve various attacks. The majority of our information diets come from algorithmically generated "feeds" of information, determined by recommendation algorithms. Even when people seek out information (e.g. Google), a recommendation algorithm determines what's shown and what isn't. This year, I have become familiar with how botnets already drive political narratives; and a shocking amount of social media traffic is driven by bots.</p>
+            <p>Countries like China and Russia have <a href="https://en.wikipedia.org/wiki/Great_Firewall" target="_blank">great firewalls</a>; Google, Facebook, YouTube, Wikipedia, etc. are all blocked. An entire separate internet ecosystem exists to ensure censorship. On the other hand, our internet is the wild west. Anyone can sell ideas and coordination can amp up ideological-spread. There may be true benefits to the wild west model, but one consequence of this is that open societies have a larger attack surface, such as political influence campaigns or just general chaos-increasing campaigns. We are prevented from effective retaliation because it feels like we'd be abandoning liberal principles (e.g. free speech).</p>
+        </section>
+
+        <section>
+            <h2>Leveling the Playing Field</h2>
+            <p>I believe one reason for the resurgence of authoritarianism and ongoing democratic backsliding is likely that the environment increasingly favors autocracy. To resist is to push pieces up a slanted board. The board seems to have tilted towards autocracy — surveillance is becoming cheaper, information spaces are easier to seal, and open societies are becoming more polarized, unstable and incompetent. Whether technology and humanity drifts towards authoritarianism or not has not been fated, and we can make changes to level the gameboard. We can invest strategically into defensive technology, diffuse AI in a way that augments rather than automates so as to decentralize power, and democratize our institutions.</p>
+
+
+            <p>Here are some ideas to begin leveling the playing field:</p>
+            <ol>
+                <li>Treat foreign state-directed information operations as weapons. This includes bot networks, the content farms built to poison training corpora, the operations run by intelligence services whose full-time jobs are destabilizing open societies. This must be done carefully, so as to ensure we don't police what Americans say to each other. Here is an example of an influence operation that Claude Deep Research surfaced: "The Pravda network represents the most significant documented case of deliberate training data contamination. Identified by the American Sunlight Project (February 2025) and corroborated by the Atlantic Council DFRLab and French intelligence watchdog Viginum, this network of 182 domains published over 3.6 million articles in 2024, averaging 10,000+ daily. The sites receive fewer than 1,000 monthly visitors and have 'no search function, poor formatting, unreliable scrolling' — they were never designed for human readers."
+                </li>
+                <li>Demand reciprocity from closed information ecosystems: China and Russia firewall out our platforms, our press, and our internet while enjoying nearly unrestricted access to ours. There is no principle of openness that requires a society to extend its openness to states that weaponize it. We have tools to tilt the playing field: export controls, divestiture requirements, and transparency mandates. We must do this carefully however, so as not to become a closed society ourselves.</li>
+                <li>Improve our epistemics and government capacity: The same technology that enables tailored propaganda could also allow us to steelman the other side, see pieces of the world we didn't know of, learn entire disciplines of knowledge, interrogate our own beliefs and become more rational. So long as we maintain a healthy lead, we can decide what type of technology we build. <a href="https://mason.gmu.edu/~rhanson/futarchy.html" target="_blank">Robin Hanson explains</a> another technology that could help us make decisions: prediction markets. Prediction markets are better at predicting the future than superforecasters; perhaps we could exploit market dynamics to make better decisions while continuing to vote on our values and preferences.</li>
+            </ol>
+            <p>We may need to find creative ways to level the game board — just as the founding fathers did — in the face of newfound pressure and the speed of the technology applying it.</p>
+        </section>
+
+        <section>
+            <h2>Against Utopia</h2>
+            <p>In our attempts to improve the future, we should beware of utopian and fanatical ideologies, as they have a pathetic track record. History is replete with examples of grand, well-intentioned schemes at improving the human condition. Practically all of them failed miserably despite their good intentions. This includes Soviet collectivization, the Great Leap Forward, and Eugenics among others. One reason schemes with benevolent intentions fail is that enacting such grandiose schemes simply requires centralizing power in the hands of fallible humans with imperfect motivations.</p>
+            <p>One of the great acts of the founders was admitting their own fallibility. They wrote of no utopia, end state or finality. The authors of the Constitution confessed that they are likely wrong. 250 years later we can see many of the ways in which they were, such as the fact that many of them owned other human beings. Yet the amendment process they initiated, the free press and the very words of the Declaration they wrote ("all men are created equal") is what ended the horrors of American slavery.</p>
+            <p>We should have a strong prior against those who claim moral certainty or a vision for utopia. I suspect our descendents will find something monstrous about how we govern today — we still have yet to defeat racial prejudice, sexism, foreign policy failures, or extreme wealth inequality. I suspect future generations will look back in horror and confusion at factory farming too. The magnetic pull of utopian idealism and ideological fanaticism is deeply human, especially when confronted with so many issues, yet we must resist it.</p>
+            <p>I have trouble articulating a utopian vision for the future. The best hope I can offer is a direction: that we keep getting incrementally wiser, more capable, more wealthy, and more empathetic. This type of progress has a better historical track record.</p>
+        </section>
+
+        <section>
+            <h2>Optimism</h2>
+            <p>I moved to Washington D.C. a few weeks ago. I don't think I've ever felt as uplifted and motivated as I have after meeting so many people with so much devotion to the country and to the future. I've met a former jet pilot devoted to making sensible warfighting rules in the age of autonomous weapons. I've met an army officer who writes about how to make the army more ethical. I've met data scientists who, instead of working on Wall St. are writing contingency plans for the U.S. government to have a sensible plan in case of a disaster — such as a terrorist using AI to design a bioweapon, an AI-driven cyberattack on critical infrastructure, or a rogue power-seeking AI on the internet. I've met PhD students and AI researchers (who put my capabilities to shame) and could have made million dollar salaries working at OpenAI or Google, but chose instead to fight tooth and nail for a government salary to build out our capacity to understand AI systems.</p>
+            <p>I have walked into Senate office buildings, found staffers, and asked if I could tell them about my AI research and how it might help them. Sometimes they literally just say yes. I've encountered worrisome issues, trends, and norms, but I've also met countless people who want to be stronger, want to work harder, want to be more ethical, and want to be told where they might be wrong. I've met people from all sorts of backgrounds who put principle above race, religion or tribe, and this makes me optimistic.</p>
+        </section>
+
+        <section>
+            <h2>Conclusion</h2>
+            <p>This isn't an attempt to stop you from criticizing the government. You should. But there are features worth preserving that are too easy to forget about under pressure. Least of which is to treat your political opponents as valid opponents — not to admit they're right, but that they're legitimate. So long as both sides view each other as adversaries to be defeated at the ballot box, not through violence or imprisonment, we can both persist and gradually improve.</p>
+            <p>A clear-eyed defense of American ideals matters more than ever in the age of intelligence. New technology and a shifting world order will likely create unprecedented pressure towards autocratization in the coming years. We must resist this, and we must also remember: the principles that define America are not bad. They are good.</p>
+            <p>To be a reasonable patriot does not mean to celebrate every foreign policy decision, endorse every presidential decree, or worship the parochial morality of the founders — it means defending American ideals. We should notice that we often fail to live up to our ideals but also that our ideals have always been good. And we can be so much better.</p>
+            <p>Happy Fourth of July</p>
+        </section>
+
+        <div class="claude-signature">
+            Written by Severin Field. Figures and theme created by <a href="https://claude.ai" target="_blank" style="text-decoration: underline;">Claude.ai</a>.
+        </div>
+    </div>
+</body>
+</html>

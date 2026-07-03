@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reversal — Ascent Figure B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 14px 18px 12px;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #fig-wrap {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        #ascent-canvas {
+            display: block;
+            width: 100%;
+        }
+
+        .fig-source {
+            font-size: 0.63rem;
+            color: rgba(255,255,255,0.22);
+            margin-top: 10px;
+            letter-spacing: 0.3px;
+            text-align: center;
+        }
+        .fig-source #phase-word {
+            color: rgba(255,255,255,0.34);
+        }
+    </style>
+</head>
+<body>
+<div id="fig-wrap">
+    <canvas id="ascent-canvas" role="img"
+        aria-label="Scattered points of light drift in from the dark and assemble, left to right, into a grid-cell American flag. Cells pulse warm coral as they lock into place. The completed flag holds, glowing, then brightens further as gold sparks rise off its top edge like stars, before the cycle begins again."></canvas>
+    <div class="fig-source">
+        signal: us_1776 &nbsp;&middot;&nbsp; entropy reversed &nbsp;&middot;&nbsp; energy well spent &nbsp;&middot;&nbsp; <span id="phase-word">gathering</span>
+    </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+
+// Grid geometry — identical language to the degrading flag figure
+const COLS = 40, ROWS = 13;
+const CANTON_COLS = 16, CANTON_ROWS = 7;
+const STAR_COLS = 8, STAR_ROWS = 5;
+
+// Palette (style.md + muted navy for the canton; gold reserved for ascent)
+const BG           = [26, 26, 26];    // #1a1a1a
+const MAROON_DEEP  = [92, 26, 36];    // #5c1a24
+const MAROON       = [139, 38, 53];   // #8b2635
+const CORAL        = [255, 107, 107]; // #ff6b6b — lock-in pulse only
+const NAVY         = [38, 49, 79];    // muted navy canton
+const NAVY_DEEP    = [30, 38, 62];
+const WHITE        = [255, 255, 255];
+const GOLD         = [255, 215, 0];   // #ffd700 — rising sparks ONLY
+
+// Timeline (seconds). One loop: gathering → assembling → holding → ascending.
+const LOOP        = 19.0;
+const GATHER_END  = 2.2;   // pure drift before the first cells begin landing
+const WAVE_START  = 1.8;   // first column's assembly begins
+const WAVE_SPAN   = 7.2;   // left-to-right sweep duration
+const COMPLETE_T  = 11.0;  // flag fully assembled around here
+const HOLD_END    = 14.5;  // warm hold ends, ascent begins
+const ASCEND_END  = 17.8;  // sparks stop spawning
+const FADE_END    = 19.0;  // everything eases back into the dark
+
+// Spring feel — soft, certain landing
+const SPRING_K   = 34;     // pull toward target
+const SPRING_C   = 7.6;    // damping
+
+// ─── SETUP ────────────────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('ascent-canvas');
+const ctx = canvas.getContext('2d');
+const phaseEl = document.getElementById('phase-word');
+
+const reducedMotion = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let W, H, dpr;                       // device-pixel canvas size
+let flagX, flagY, flagW, flagH;      // flag rect (device px)
+let cellW, cellH;
+let animId = null;
+let startT = null;
+let cycleIndex = -1;
+let lastTs = null;
+let currentPhase = '';
+
+const particles = [];  // grid cells + canton stars
+const sparks = [];     // gold ascent sparks
+let sparkAccum = 0;
+
+// deterministic pseudo-random (stable flag texture across cycles/resizes)
+function seeded(i) {
+    const x = Math.sin(i * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+function lerpRGB(c1, c2, t) {
+    return [lerp(c1[0], c2[0], t), lerp(c1[1], c2[1], t), lerp(c1[2], c2[2], t)];
+}
+function rgba(c, a) {
+    return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a.toFixed(3) + ')';
+}
+function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+function smoothstep(e0, e1, x) {
+    const t = clamp01((x - e0) / (e1 - e0));
+    return t * t * (3 - 2 * t);
+}
+function easeOutBack(t) {
+    const c1 = 1.4, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+// ─── PARTICLE DEFINITION ──────────────────────────────────────────────────────
+
+function buildParticles() {
+    particles.length = 0;
+    let seed = 0;
+
+    // grid cells
+    for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+            seed++;
+            const rnd  = seeded(seed);
+            const rnd2 = seeded(seed + 1000);
+            const inCanton = row < CANTON_ROWS && col < CANTON_COLS;
+            const redStripe = row % 2 === 0;
+
+            let color, alpha, warmable;
+            if (inCanton) {
+                // muted navy field, faint texture variation
+                color = lerpRGB(NAVY_DEEP, NAVY, rnd * 0.8);
+                alpha = 0.92 - rnd2 * 0.06;
+                warmable = 0.25;
+            } else if (redStripe) {
+                // deep maroon → maroon texture; these carry the warm glow
+                color = lerpRGB(MAROON_DEEP, MAROON, 0.35 + rnd * 0.55);
+                alpha = 0.9 - rnd2 * 0.08;
+                warmable = 1;
+            } else {
+                // low-opacity white stripes
+                color = WHITE;
+                alpha = 0.34 + rnd * 0.1;
+                warmable = 0.45;
+            }
+
+            particles.push({
+                isStar: false,
+                col: col, row: row,
+                color: color, baseAlpha: alpha, warmable: warmable,
+                // assembly wave: left → right, gentle jitter per cell
+                t0: WAVE_START + (col / (COLS - 1)) * WAVE_SPAN + rnd2 * 0.9,
+                seed: seed,
+                x: 0, y: 0, vx: 0, vy: 0, sx: 0, sy: 0,
+                locked: false, lockT: 0
+            });
+        }
+    }
+
+    // canton stars — they land shortly after their column of field does
+    for (let r = 0; r < STAR_ROWS; r++) {
+        const cols = (r % 2 === 0) ? STAR_COLS : STAR_COLS - 1;
+        for (let c = 0; c < cols; c++) {
+            seed++;
+            const rnd = seeded(seed);
+            const fracX = (r % 2 === 0)
+                ? (c + 0.5) / STAR_COLS
+                : (c + 0.5) / (STAR_COLS - 1);
+            particles.push({
+                isStar: true,
+                starFX: fracX, starFY: (r + 0.5) / STAR_ROWS,
+                color: WHITE, baseAlpha: 0.88 - rnd * 0.1, warmable: 0,
+                t0: WAVE_START + 0.7 + fracX * (WAVE_SPAN * CANTON_COLS / COLS) + rnd * 0.5,
+                seed: seed,
+                x: 0, y: 0, vx: 0, vy: 0, sx: 0, sy: 0,
+                locked: false, lockT: 0
+            });
+        }
+    }
+}
+
+// target positions in device px (recomputed on resize)
+function targetOf(p) {
+    if (p.isStar) {
+        const cantonW = CANTON_COLS * cellW, cantonH = CANTON_ROWS * cellH;
+        const padX = cantonW * 0.09, padY = cantonH * 0.10;
+        return [
+            flagX + padX + (cantonW - padX * 2) * p.starFX,
+            flagY + padY + (cantonH - padY * 2) * p.starFY
+        ];
+    }
+    return [
+        flagX + (p.col + 0.5) * cellW,
+        flagY + (p.row + 0.5) * cellH
+    ];
+}
+
+// scattered origins: points of light out in the dark, mostly near/off the edges
+function scatterCycle() {
+    const cx = flagX + flagW / 2, cy = flagY + flagH / 2;
+    const maxR = Math.max(W, H);
+    for (const p of particles) {
+        const ang = Math.random() * Math.PI * 2;
+        const rad = maxR * (0.42 + Math.random() * 0.55);
+        p.sx = cx + Math.cos(ang) * rad;
+        p.sy = cy + Math.sin(ang) * rad * 0.75;
+        p.x = p.sx; p.y = p.sy;
+        p.vx = 0; p.vy = 0;
+        p.locked = false; p.lockT = 0;
+        p.wPhase = Math.random() * Math.PI * 2;
+        p.wFreq = 0.4 + Math.random() * 0.5;
+    }
+    sparks.length = 0;
+    sparkAccum = 0;
+}
+
+// ─── SIZING (house pattern: devicePixelRatio-aware) ──────────────────────────
+
+function resize() {
+    dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.parentElement.clientWidth;
+    const flagCssW = cssW * 0.86;
+    const flagCssH = flagCssW * (340 / 640);
+    const topPad = Math.max(64, cssW * 0.17);   // sky — room for sparks to rise
+    const cssH = Math.round(topPad + flagCssH + 14);
+
+    W = Math.round(cssW * dpr);
+    H = Math.round(cssH * dpr);
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = cssH + 'px';
+
+    flagW = flagCssW * dpr;
+    flagH = flagCssH * dpr;
+    flagX = (W - flagW) / 2;
+    flagY = topPad * dpr;
+    cellW = flagW / COLS;
+    cellH = flagH / ROWS;
+}
+
+// ─── GOLD SPARKS (ascent phase only) ──────────────────────────────────────────
+
+function spawnSpark(tc) {
+    const rnd = Math.random();
+    // rise from the upper band of the flag — cells brightening past "flag"
+    const x = flagX + Math.random() * flagW;
+    const y = flagY + Math.random() * flagH * 0.28;
+    const becomesStar = Math.random() < 0.3; // some sparks settle as stars
+    sparks.push({
+        x: x, y: y,
+        vy: -(22 + Math.random() * 42) * dpr,
+        sway: (Math.random() - 0.5) * 14 * dpr,
+        swayF: 0.8 + Math.random() * 1.4,
+        born: tc,
+        life: becomesStar ? (FADE_END - tc) : (2.2 + Math.random() * 1.3),
+        size: (0.9 + rnd * 1.6) * dpr,
+        star: becomesStar,
+        restY: flagY - (0.25 + Math.random() * 0.75) * (flagY - 8 * dpr),
+        tw: Math.random() * Math.PI * 2
+    });
+}
+
+function drawSparks(tc, fade) {
+    for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        const age = tc - s.born;
+        if (age > s.life || tc < s.born) { sparks.splice(i, 1); continue; }
+
+        let a;
+        if (s.star) {
+            // decelerate into place in the sky, then twinkle
+            if (s.y > s.restY) s.y += s.vy * 0.016 * smoothstep(0, 0.3, age);
+            if (s.y < s.restY) s.y = s.restY;
+            const settled = s.y <= s.restY + 1;
+            a = smoothstep(0, 0.5, age) * (settled ? 0.55 + 0.3 * Math.sin(tc * 2.2 + s.tw) : 0.7);
+        } else {
+            s.y += s.vy * 0.016;
+            s.vy -= 6 * dpr * 0.016; // gentle acceleration upward
+            const lifeT = age / s.life;
+            a = Math.sin(Math.PI * clamp01(lifeT)) * 0.85;
+        }
+        const sx = s.x + Math.sin(age * s.swayF + s.tw) * s.sway * clamp01(age / 1.5);
+
+        ctx.fillStyle = rgba(GOLD, a * fade);
+        ctx.beginPath();
+        ctx.arc(sx, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+        // tiny halo on the star-sparks
+        if (s.star) {
+            ctx.fillStyle = rgba(GOLD, a * fade * 0.16);
+            ctx.beginPath();
+            ctx.arc(sx, s.y, s.size * 2.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
+// ─── MAIN DRAW ────────────────────────────────────────────────────────────────
+
+function setPhase(tc) {
+    const ph = tc < GATHER_END ? 'gathering'
+             : tc < COMPLETE_T ? 'assembling'
+             : tc < HOLD_END   ? 'holding'
+             : 'ascending';
+    if (ph !== currentPhase) {
+        currentPhase = ph;
+        phaseEl.textContent = ph;
+    }
+}
+
+function drawFrame(tc, dt) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = rgba(BG, 1);
+    ctx.fillRect(0, 0, W, H);
+
+    // global envelope: fade everything back into the dark at loop end
+    const fade = 1 - smoothstep(ASCEND_END + 0.1, FADE_END, tc);
+
+    // warmth: rises once the flag completes, holds, lifts further in ascent
+    const warm = smoothstep(COMPLETE_T - 0.8, COMPLETE_T + 1.6, tc);
+    // ascent brightening: cells push past "flag" toward light
+    const ascend = smoothstep(HOLD_END, HOLD_END + 1.8, tc);
+
+    // ── particles ──
+    for (const p of particles) {
+        const [tx, ty] = targetOf(p);
+
+        if (!p.locked) {
+            if (tc < p.t0) {
+                // gathering: slow wander + the faintest pull inward,
+                // like something out there has begun to organize
+                const pull = smoothstep(0, p.t0, tc) * 0.16;
+                const wob = Math.sin(tc * p.wFreq + p.wPhase);
+                p.x = lerp(p.sx, tx, pull) + wob * 6 * dpr;
+                p.y = lerp(p.sy, ty, pull) + Math.cos(tc * p.wFreq * 0.8 + p.wPhase) * 5 * dpr;
+            } else {
+                // spring toward the grid — soft, certain landing
+                const k = SPRING_K, c = SPRING_C;
+                p.vx += (tx - p.x) * k * dt;
+                p.vy += (ty - p.y) * k * dt;
+                const damp = Math.exp(-c * dt);
+                p.vx *= damp; p.vy *= damp;
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+
+                const d = Math.hypot(tx - p.x, ty - p.y);
+                const spd = Math.hypot(p.vx, p.vy);
+                if ((d < 2.2 * dpr && spd < 16 * dpr) || tc > p.t0 + 2.6) {
+                    p.locked = true;
+                    p.lockT = tc;
+                    p.x = tx; p.y = ty;
+                }
+            }
+
+            // en-route: a small point of light, twinkling
+            const tw = 0.45 + 0.3 * Math.sin(tc * 2.4 + p.wPhase);
+            const enCol = lerpRGB(p.color, WHITE, 0.55);
+            ctx.fillStyle = rgba(enCol, tw * 0.55 * fade);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, (p.isStar ? 1.1 : 1.5) * dpr, 0, Math.PI * 2);
+            ctx.fill();
+            continue;
+        }
+
+        // ── locked: bloom from point into cell ──
+        const age = tc - p.lockT;
+        const scale = age < 0.55 ? 0.35 + 0.65 * easeOutBack(clamp01(age / 0.55)) : 1;
+        const pulse = Math.max(0, 1 - age / 0.85); // brief coral welcome
+
+        let col = p.color;
+        let alpha = p.baseAlpha;
+
+        if (pulse > 0) {
+            col = lerpRGB(col, CORAL, pulse * 0.85);
+            alpha = Math.min(1, alpha + pulse * 0.3);
+        }
+        // warmer than the degraded flag ever was
+        if (warm > 0 && p.warmable > 0) {
+            const breath = 1 + 0.07 * Math.sin(tc * 1.4 + p.col * 0.18);
+            col = lerpRGB(col, CORAL, 0.16 * warm * p.warmable);
+            alpha = Math.min(1, alpha * (1 + 0.12 * warm * p.warmable) * breath);
+        }
+        // ascent: brighten past "flag", strongest near the top
+        if (ascend > 0) {
+            const rowFrac = p.isStar ? 0.15 : p.row / (ROWS - 1);
+            const lift = ascend * (1 - rowFrac * 0.8);
+            col = lerpRGB(col, WHITE, 0.2 * lift);
+            alpha = Math.min(1, alpha + 0.14 * lift);
+        }
+
+        ctx.fillStyle = rgba(col, alpha * fade);
+        if (p.isStar) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.7 * dpr * scale, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            const w = cellW * 0.82 * scale, h = cellH * 0.82 * scale;
+            ctx.fillRect(p.x - w / 2, p.y - h / 2, w, h);
+        }
+    }
+
+    // ── warm wash over the completed flag (glow without per-cell shadows) ──
+    if (warm > 0) {
+        const g = ctx.createRadialGradient(
+            flagX + flagW / 2, flagY + flagH / 2, flagH * 0.1,
+            flagX + flagW / 2, flagY + flagH / 2, flagW * 0.62
+        );
+        g.addColorStop(0, rgba(CORAL, 0.055 * warm * fade));
+        g.addColorStop(1, rgba(CORAL, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+    }
+
+    // ── gold sparks: construction overflowing into ascent ──
+    if (tc > HOLD_END && tc < ASCEND_END) {
+        sparkAccum += dt * 13;
+        while (sparkAccum >= 1) { sparkAccum -= 1; spawnSpark(tc); }
+    }
+    drawSparks(tc, fade);
+
+    setPhase(tc);
+}
+
+// ─── STATIC FRAME (prefers-reduced-motion) ────────────────────────────────────
+
+function drawStatic() {
+    // everything locked, warm hold, a few risen gold stars
+    for (const p of particles) {
+        p.locked = true; p.lockT = -10;
+        const [tx, ty] = targetOf(p);
+        p.x = tx; p.y = ty;
+    }
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = rgba(BG, 1);
+    ctx.fillRect(0, 0, W, H);
+
+    for (const p of particles) {
+        let col = p.color, alpha = p.baseAlpha;
+        if (p.warmable > 0) {
+            col = lerpRGB(col, CORAL, 0.13 * p.warmable);
+            alpha = Math.min(1, alpha * (1 + 0.1 * p.warmable));
+        }
+        ctx.fillStyle = rgba(col, alpha);
+        if (p.isStar) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.7 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            const w = cellW * 0.82, h = cellH * 0.82;
+            ctx.fillRect(p.x - w / 2, p.y - h / 2, w, h);
+        }
+    }
+
+    const g = ctx.createRadialGradient(
+        flagX + flagW / 2, flagY + flagH / 2, flagH * 0.1,
+        flagX + flagW / 2, flagY + flagH / 2, flagW * 0.62
+    );
+    g.addColorStop(0, rgba(CORAL, 0.05));
+    g.addColorStop(1, rgba(CORAL, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // risen stars in the sky above the flag
+    for (let i = 0; i < 8; i++) {
+        const rnd = seeded(i * 7 + 3), rnd2 = seeded(i * 11 + 5), rnd3 = seeded(i * 13 + 9);
+        const x = flagX + rnd * flagW;
+        const y = flagY * (0.18 + rnd2 * 0.7);
+        const size = (0.9 + rnd3 * 1.5) * dpr;
+        ctx.fillStyle = rgba(GOLD, 0.5 + rnd3 * 0.3);
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = rgba(GOLD, 0.12);
+        ctx.beginPath();
+        ctx.arc(x, y, size * 2.6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    phaseEl.textContent = 'ascended';
+}
+
+// ─── ANIMATION LOOP ───────────────────────────────────────────────────────────
+
+function animate(ts) {
+    if (startT === null) { startT = ts; lastTs = ts; }
+    const t = (ts - startT) / 1000;
+    const dt = Math.min((ts - lastTs) / 1000, 0.033);
+    lastTs = ts;
+
+    const cycle = Math.floor(t / LOOP);
+    if (cycle !== cycleIndex) {
+        cycleIndex = cycle;
+        scatterCycle(); // fresh points of light drift in from new places
+    }
+    const tc = t - cycle * LOOP;
+
+    drawFrame(tc, dt);
+    animId = requestAnimationFrame(animate);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+function start() {
+    if (animId) cancelAnimationFrame(animId);
+    resize();
+    if (reducedMotion) {
+        drawStatic();
+        return;
+    }
+    startT = null;
+    lastTs = null;
+    cycleIndex = -1;
+    animId = requestAnimationFrame(animate);
+}
+
+buildParticles();
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(start, 80);
+});
+
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+} else {
+    start();
+}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Eagle Is In The Signal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 20px 14px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #fig {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        #cv {
+            display: block;
+            width: 100%;
+        }
+
+        .telemetry {
+            font-size: 0.63rem;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.35);
+            margin-top: 9px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .telemetry span { color: #ff6b6b; }
+
+        .fig-source {
+            font-size: 0.63rem;
+            letter-spacing: 0.03em;
+            color: rgba(255,255,255,0.22);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="fig">
+    <canvas id="cv" role="img" aria-label="An American flag rendered as a degrading grid of glitch pixels. Hidden inside the noise, an eagle-shaped region of the flag refuses to decay — its cells hold their light and shift toward navy and white while the signal around them frays."></canvas>
+    <div class="telemetry" id="tel">signal: us_1776 &middot; acquiring carrier&hellip;</div>
+    <div class="fig-source">the eagle was never painted on the flag — it is the part of the signal that refuses to decay.</div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    const EAGLE_SRC = 'data:image/png;base64,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';
+
+    // ── palette (style.md; navy exception granted for this figure) ──
+    const MAROON_DEEP = [92, 26, 36];    // #5c1a24
+    const MAROON      = [139, 38, 53];   // #8b2635
+    const MAROON_DARK = [42, 13, 18];    // #2a0d12
+    const CORAL       = [255, 107, 107]; // #ff6b6b
+    const CORAL_LIGHT = [255, 135, 135]; // #ff8787
+    const WHITE       = [255, 255, 255];
+    const NAVY        = [46, 64, 87];    // #2e4057 muted, desaturated
+    const NAVY_DEEP   = [36, 52, 77];    // #24344d
+    const BG = '#1a1a1a';
+
+    const STR_CORAL = 'rgb(255,107,107)';
+    const STR_WHITE = 'rgb(255,255,255)';
+    const STR_NAVY  = 'rgb(46,64,87)';
+
+    // ── grid ──
+    const COLS = 54, ROWS = 26;           // 26 rows = 13 stripes x 2
+    const CANTON_COLS = 22, CANTON_ROWS = 14; // 7 stripes
+    const N = COLS * ROWS;
+
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d');
+    const tel = document.getElementById('tel');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── helpers ──
+    function mix(a, b, t) {
+        return [
+            Math.round(a[0] + (b[0] - a[0]) * t),
+            Math.round(a[1] + (b[1] - a[1]) * t),
+            Math.round(a[2] + (b[2] - a[2]) * t)
+        ];
+    }
+    function str(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+    function hash(n) {
+        const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+        return x - Math.floor(x);
+    }
+
+    // ── eagle mask: sampled once at load into an alpha buffer ──
+    let maskA = null, maskW = 0, maskH = 0, maskAspect = 377 / 403;
+    // eagleAlpha in eagle-normalized coords u,v in [0,1] → 0..1
+    function eagleAlpha(u, v) {
+        if (u < 0 || u >= 1 || v < 0 || v >= 1) return 0;
+        return maskA[((v * maskH) | 0) * maskW + ((u * maskW) | 0)] / 255;
+    }
+
+    // ── layout state (rebuilt on resize) ──
+    let W = 0, H = 0, dpr = 1, cellW = 0, cellH = 0;
+    let cells = [];   // per-cell precomputed
+    let stars = [];
+    let wake = null;  // Float32Array, afterimage of eagle passage
+
+    function buildCells() {
+        cells = [];
+        cellW = W / COLS;
+        cellH = H / ROWS;
+        const gapX = cellW * 0.09, gapY = cellH * 0.09;
+        const rw = cellW * 0.82, rh = cellH * 0.82;
+
+        let sc = 0;
+        for (let row = 0; row < ROWS; row++) {
+            const stripe = row >> 1;
+            const parityRed = stripe % 2 === 0;
+            for (let col = 0; col < COLS; col++) {
+                sc++;
+                const i = row * COLS + col;
+                const inCanton = row < CANTON_ROWS && col < CANTON_COLS;
+                const t = col / (COLS - 1);              // 0 intact → 1 frayed
+                const rnd = hash(sc), rnd2 = hash(sc + 7000);
+
+                let base, op;
+                if (inCanton) {
+                    const ct = col / CANTON_COLS;
+                    base = mix(MAROON_DEEP, MAROON, ct * 0.6);
+                    op = 0.96 - ct * 0.08;
+                } else if (t < 0.30) {
+                    base = mix(MAROON_DEEP, MAROON, t / 0.30);
+                    op = parityRed ? 0.94 : 0.42;
+                } else if (t < 0.62) {
+                    const l = (t - 0.30) / 0.32;
+                    base = mix(MAROON, CORAL, l);
+                    op = parityRed ? (0.9 - l * 0.15) : (0.4 - l * 0.1);
+                } else if (t < 0.85) {
+                    const l = (t - 0.62) / 0.23;
+                    base = mix(CORAL, CORAL_LIGHT, l);
+                    op = parityRed ? (0.72 - l * 0.34) : (0.3 - l * 0.17);
+                } else {
+                    const l = (t - 0.85) / 0.15;
+                    base = mix(CORAL_LIGHT, WHITE, l * 0.7);
+                    op = Math.max(0.05, (parityRed ? 0.38 : 0.16) - l * 0.28);
+                }
+
+                // eagle interference colors, precomputed per cell.
+                // the interference gain rises with local degradation: on the
+                // intact left the eagle is a faint inversion you might miss;
+                // in the frayed right it is the only thing still standing.
+                const eff = 0.24 + 0.76 * t;
+                const soft = mix(base, NAVY, 0.5 * eff);
+                const strong = parityRed
+                    ? mix(mix(base, NAVY_DEEP, 0.85 * eff), WHITE, 0.05 * eff)
+                    : mix(mix(base, NAVY, 0.35 * eff), WHITE, 0.55 * eff);
+                const wakeC = mix(base, NAVY, 0.3 * eff);
+
+                cells.push({
+                    x: col * cellW + gapX, y: row * cellH + gapY, w: rw, h: rh,
+                    row: row, col: col,
+                    cx: (col + 0.5) * cellW, cy: (row + 0.5) * cellH,
+                    t: t, op: op,
+                    eff: eff,
+                    sBase: str(base), sSoft: str(soft), sStrong: str(strong), sWake: str(wakeC),
+                    seed: rnd, seed2: rnd2,
+                    fSp: 1.1 + rnd2 * 2.2,        // flicker speed
+                    fPh: rnd * 6.283,             // flicker phase
+                    dark: !parityRed && !inCanton
+                });
+            }
+        }
+
+        // stars in the canton (staggered 8 / 7)
+        stars = [];
+        const cw = CANTON_COLS * cellW, ch = CANTON_ROWS * cellH;
+        const padX = cw * 0.09, padY = ch * 0.10;
+        const uw = cw - padX * 2, uh = ch - padY * 2;
+        for (let r = 0; r < 5; r++) {
+            const nc = (r % 2 === 0) ? 8 : 7;
+            for (let c = 0; c < nc; c++) {
+                const rnd = hash(r * 31 + c * 7 + 3.3);
+                const sx = padX + (uw / nc) * (c + 0.5);
+                const sy = padY + (uh / 5) * (r + 0.5);
+                const sz = Math.max(2.4, cellW * 0.24) + (rnd - 0.5) * 1.2;
+                stars.push({ x: sx, y: sy, s: sz, seed: rnd, o: 0.9 - (sx / uw) * 0.2 });
+            }
+        }
+
+        if (!wake || wake.length !== N) wake = new Float32Array(N);
+    }
+
+    function resize() {
+        const w = Math.max(280, cv.parentElement.clientWidth);
+        W = w;
+        H = Math.round(w * 0.485);
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        cv.width = Math.round(W * dpr);
+        cv.height = Math.round(H * dpr);
+        cv.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        buildCells();
+    }
+
+    // ── burst state machine ──
+    let burstUntil = -1, burstSeed = 0, nextBurst = 4.5, afterglow = 0;
+
+    // ── main draw ──
+    function draw(t) {
+        // eagle drift + breath: the interference region moves so its
+        // shape is revealed by its wake
+        const es = 1 + 0.045 * Math.sin(t * 0.13 + 0.6);
+        const eh = H * 0.88 * es;
+        const ew = eh * maskAspect;
+        const ex = W * (0.555 + 0.020 * Math.sin(t * 0.21));
+        const ey = H * (0.505 + 0.016 * Math.sin(t * 0.16 + 1.7));
+        const ex0 = ex - ew / 2, ey0 = ey - eh / 2;
+
+        // burst scheduling
+        let burst = false, bStep = 0;
+        if (!reduced) {
+            if (t >= nextBurst && t > burstUntil) {
+                burstUntil = t + 0.55 + hash(t) * 0.3;
+                burstSeed = Math.floor(t * 100);
+                nextBurst = burstUntil + 6 + hash(t + 9) * 5;
+            }
+            burst = t < burstUntil;
+            if (burst) { bStep = Math.floor(t * 14); afterglow = 1; }
+            else afterglow *= 0.97;
+        }
+
+        // torn-row offsets during bursts
+        let tearA = -1, tearB = -1, tearOffA = 0, tearOffB = 0;
+        if (burst) {
+            tearA = Math.floor(hash(burstSeed + bStep) * (ROWS - 3));
+            tearB = Math.floor(hash(burstSeed + bStep + 41) * (ROWS - 3));
+            tearOffA = (hash(burstSeed + bStep + 5) - 0.5) * 30;
+            tearOffB = (hash(burstSeed + bStep + 77) - 0.5) * 22;
+        }
+
+        ctx.fillStyle = BG;
+        ctx.fillRect(0, 0, W, H);
+
+        const dropStep = Math.floor(t * 1.7);
+        const du = cellW / ew, dv = cellH / eh; // one-cell offsets in eagle space
+
+        for (let i = 0; i < N; i++) {
+            const c = cells[i];
+
+            // eagle field at this cell
+            const u = (c.cx - ex0) / ew, v = (c.cy - ey0) / eh;
+            const e = maskA ? eagleAlpha(u, v) : 0;
+
+            // wake: cells the eagle has passed through keep a fading
+            // navy afterimage — the shape seen by where it has been
+            let wk = wake[i];
+            if (e > 0.3) { wk = 1; }
+            else { wk *= 0.988; if (wk < 0.02) wk = 0; }
+            wake[i] = wk;
+
+            // dynamic dropout in the frayed zone — suppressed inside the
+            // eagle: the shape repairs what the noise erases
+            if (c.t > 0.68 && e < 0.3) {
+                const dp = ((c.t - 0.68) / 0.32) * 0.55;
+                if (hash(c.seed * 991 + dropStep) < dp) continue;
+            }
+
+            // flicker: ambient decay everywhere, steadier inside the eagle
+            let amp = 0.16 + c.t * 0.42;
+            amp *= 1 - e * 0.78;
+            const fl = 1 - amp * (0.5 + 0.5 * Math.sin(t * c.fSp + c.fPh))
+                             * (0.62 + 0.38 * Math.sin(t * 1.9 + c.fPh * 2.1));
+
+            let style, op;
+            if (burst && e > 0.3) {
+                // full-frame glitch: the eagle region strobes red/white/blue
+                const k = (c.row + ((t * 30) | 0)) % 3;
+                style = k === 0 ? STR_CORAL : (k === 1 ? STR_WHITE : STR_NAVY);
+                op = 0.85;
+            } else if (e > 0.6) {
+                // opacity boost also scales with degradation: persistence is
+                // the reveal, and only decay makes persistence visible
+                const held = Math.min(0.94, Math.max(c.op, c.dark ? 0.5 : 0.62) + 0.22);
+                op = (c.op + (held - c.op) * c.eff) * fl;
+                style = c.sStrong;
+                if (afterglow > 0.25) op = Math.min(0.96, op + afterglow * 0.18 * c.eff);
+            } else if (e > 0.16) {
+                style = c.sSoft;
+                const held = Math.min(0.9, Math.max(c.op, 0.4) + e * 0.3);
+                op = (c.op + (held - c.op) * c.eff) * fl;
+            } else if (wk > 0.06) {
+                style = c.sWake;
+                op = c.op * fl * (1 + wk * 0.3);
+            } else {
+                style = c.sBase;
+                op = c.op * fl;
+                // sparse inversion noise across the whole frame during bursts
+                if (burst && hash(c.seed2 * 577 + bStep) < 0.07) {
+                    style = STR_WHITE; op = 0.28;
+                }
+            }
+
+            // edge shimmer: cells straddling the mask boundary glint white,
+            // tracing the silhouette as it drifts
+            if (e > 0.4 && c.seed2 > 0.45) {
+                const near = Math.min(
+                    eagleAlpha(u - du, v), eagleAlpha(u + du, v),
+                    eagleAlpha(u, v - dv), eagleAlpha(u, v + dv));
+                if (near < 0.12) {
+                    const g = 0.5 + 0.5 * Math.sin(t * 2.3 + c.seed * 12.0);
+                    if (g > 0.55) { style = STR_WHITE; op = (0.30 + g * 0.34) * (0.35 + 0.65 * c.eff); }
+                }
+            }
+
+            let x = c.x;
+            if (c.row >= tearA && c.row < tearA + 2) x += tearOffA;
+            else if (c.row >= tearB && c.row < tearB + 3) x += tearOffB;
+
+            ctx.globalAlpha = op;
+            ctx.fillStyle = style;
+            ctx.fillRect(x, c.y, c.w, c.h);
+        }
+
+        // canton stars — inside the eagle field they flicker coral: even
+        // the stars are disturbed where the shape passes
+        for (let s = 0; s < stars.length; s++) {
+            const st = stars[s];
+            const u = (st.x - ex0) / ew, v = (st.y - ey0) / eh;
+            const e = maskA ? eagleAlpha(u, v) : 0;
+            const tw = 0.75 + 0.25 * Math.sin(t * (1.3 + st.seed * 1.8) + st.seed * 9);
+            ctx.globalAlpha = st.o * tw;
+            ctx.fillStyle = e > 0.35 ? STR_CORAL : STR_WHITE;
+            ctx.fillRect(st.x - st.s / 2, st.y - st.s / 2, st.s, st.s);
+        }
+
+        // faint scanlines during bursts
+        if (burst) {
+            ctx.globalAlpha = 0.06;
+            ctx.fillStyle = STR_WHITE;
+            const y1 = hash(burstSeed + bStep + 13) * H;
+            const y2 = hash(burstSeed + bStep + 29) * H;
+            ctx.fillRect(0, y1, W, 1.5);
+            ctx.fillRect(0, y2, W, 1);
+        }
+
+        ctx.globalAlpha = 1;
+        return burst;
+    }
+
+    // ── telemetry ──
+    const PHASES = [
+        'unidentified persistence in band 4',
+        'region resists decay &middot; re-scanning',
+        'recurrence @ 0.21 Hz &middot; shape-like',
+        'interference is self-repairing',
+        'pattern match: <span>aquila</span> &middot; conf 0.83'
+    ];
+    let lastTel = -10;
+    function updateTel(t, burst) {
+        if (t - lastTel < 0.4) return;
+        lastTel = t;
+        const integ = (63 + 5.5 * Math.sin(t * 0.05) + (hash(Math.floor(t * 2.5)) - 0.5) * 2.4).toFixed(1);
+        const status = burst
+            ? '<span>PATTERN LOCK &middot; band strobe r/w/b</span>'
+            : PHASES[Math.floor(t / 7) % PHASES.length];
+        tel.innerHTML = 'signal: us_1776 &middot; carrier degrading &middot; integrity <span>'
+            + integ + '%</span> &middot; ' + status;
+    }
+
+    // ── loop ──
+    let raf = 0, t0 = 0;
+    function loop(now) {
+        const t = (now - t0) / 1000;
+        const burst = draw(t);
+        updateTel(t, burst);
+        raf = requestAnimationFrame(loop);
+    }
+
+    function start() {
+        resize();
+        if (reduced) {
+            // one good static frame: eagle mid-drift, no burst, wake pre-warmed
+            for (let k = 0; k < 3; k++) draw(2.4 + k * 0.4);
+            draw(3.6);
+            tel.innerHTML = 'signal: us_1776 &middot; carrier degrading &middot; integrity <span>63.2%</span> &middot; ' + PHASES[0];
+            return;
+        }
+        t0 = performance.now();
+        raf = requestAnimationFrame(loop);
+    }
+
+    // resize handling, debounced 80ms
+    let rto = 0;
+    window.addEventListener('resize', function () {
+        clearTimeout(rto);
+        rto = setTimeout(function () {
+            resize();
+            if (reduced) { for (let k = 0; k < 3; k++) draw(2.4 + k * 0.4); draw(3.6); }
+        }, 80);
+    });
+
+    // ── boot: mask + fonts, then go ──
+    const img = new Image();
+    img.onload = function () {
+        maskW = img.width; maskH = img.height;
+        maskAspect = maskW / maskH;
+        const oc = document.createElement('canvas');
+        oc.width = maskW; oc.height = maskH;
+        const octx = oc.getContext('2d');
+        octx.drawImage(img, 0, 0);
+        const d = octx.getImageData(0, 0, maskW, maskH).data;
+        maskA = new Uint8Array(maskW * maskH);
+        for (let p = 0; p < maskA.length; p++) maskA[p] = d[p * 4 + 3];
+        document.fonts.ready.then(start);
+    };
+    img.src = EAGLE_SRC;
+})();
+</script>
+</body>
+</html>

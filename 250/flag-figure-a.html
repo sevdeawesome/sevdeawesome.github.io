@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Degrading Signal — The American Experiment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 20px 14px;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #fig-wrap { width: 100%; }
+
+        #flag-canvas {
+            display: block;
+            width: 100%;
+        }
+
+        .fig-source {
+            font-size: 0.63rem;
+            color: rgba(255,255,255,0.22);
+            margin-top: 8px;
+            letter-spacing: 0.1px;
+            font-family: 'Rubik', monospace;
+        }
+        .fig-source a { color: rgba(255,255,255,0.3); text-decoration: none; }
+    </style>
+</head>
+<body>
+<div id="fig-wrap">
+    <canvas id="flag-canvas"></canvas>
+    <div class="fig-source">
+        signal: us_1776 &nbsp;·&nbsp; integrity degrading &nbsp;·&nbsp; energy required to maintain
+    </div>
+</div>
+
+<script>
+// ─── CANVAS SETUP ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('flag-canvas');
+const ctx = canvas.getContext('2d');
+
+let W, H, dpr, cssW, cssH;
+let animId;
+let startT = null;
+
+// Grid geometry (in "cell units" — recomputed on resize)
+let cols, rows, cell;
+
+// Escaped glitch particles that have drifted past the right edge
+let particles = [];
+
+function resize() {
+    dpr = window.devicePixelRatio || 1;
+    cssW = canvas.parentElement.clientWidth;
+    cssH = Math.min(Math.round(cssW * 0.5), 340);
+
+    W = Math.round(cssW * dpr);
+    H = Math.round(cssH * dpr);
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = cssH + 'px';
+
+    // 13 rows for the 13 stripes; columns scale with width for square-ish cells
+    rows = 13;
+    cell = H / rows;
+    cols = Math.round(W / cell);
+
+    particles = [];
+}
+
+// ─── PALETTE ──────────────────────────────────────────────────────────────────
+// Deep maroon -> coral -> washed/white-hot, all derived from style.md palette
+const DARK_MAROON = { r: 0x5c, g: 0x1a, b: 0x24 }; // #5c1a24
+const MID_RED     = { r: 0x8b, g: 0x26, b: 0x35 }; // #8b2635
+const CORAL       = { r: 0xff, g: 0x6b, b: 0x6b }; // #ff6b6b
+const WHITE       = { r: 0xff, g: 0xff, b: 0xff };
+const CANTON_BLUE = { r: 0x24, g: 0x2c, b: 0x3e }; // muted near-navy, used sparingly
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function mixColor(c1, c2, t) {
+    return {
+        r: lerp(c1.r, c2.r, t),
+        g: lerp(c1.g, c2.g, t),
+        b: lerp(c1.b, c2.b, t)
+    };
+}
+function rgba(c, a) {
+    return `rgba(${c.r|0},${c.g|0},${c.b|0},${a})`;
+}
+
+// ─── NOISE HELPER ─────────────────────────────────────────────────────────────
+function hash(x, y, seed) {
+    let h = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453;
+    return h - Math.floor(h);
+}
+
+// ─── DRAWING ──────────────────────────────────────────────────────────────────
+// Canton occupies left ~40% and top 7 stripes, like a real flag.
+function drawFlag(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    const cantonColFrac = 0.40;   // fraction of width where canton ends
+    const cantonRows = 7;         // stripes covered by canton
+    const decayStart = 0.55;      // fraction of width where degradation begins
+    const decayEnd = 1.05;        // fraction where signal is fully gone (into margin)
+
+    // Global strain pulse: breathing intensity of glitch/noise (not one-directional decay)
+    const strain = 0.5 + 0.5 * Math.sin(t * 0.6);       // slow breathing 0..1
+    const jitter = 0.5 + 0.5 * Math.sin(t * 5.3 + 1.2); // fast flicker component
+    const strainMix = strain * 0.7 + jitter * 0.3;
+
+    for (let row = 0; row < rows; row++) {
+        const isCantonRow = row < cantonRows;
+        const y = row * cell;
+
+        for (let col = 0; col < cols; col++) {
+            const x = col * cell;
+            const xFrac = col / cols;
+
+            const inCanton = isCantonRow && xFrac < cantonColFrac;
+
+            // How degraded is this cell (0 = solid, 1 = fully scattered)
+            let decay = 0;
+            if (xFrac > decayStart) {
+                decay = (xFrac - decayStart) / (decayEnd - decayStart);
+                decay = Math.min(1, Math.max(0, decay));
+            }
+            // Strain modulates how far decay reaches — flag "flexes"
+            decay *= (0.55 + 0.45 * strainMix);
+
+            // Random jitter per-cell so it feels alive
+            const n = hash(col, row, Math.floor(t * 6));
+            const n2 = hash(col * 3.1, row * 7.7, Math.floor(t * 6) + 91);
+
+            // Cell drops out entirely once decay + noise crosses threshold —
+            // this creates the "breaking into scattered pixels" look
+            const dropoutChance = decay * 0.9;
+            if (decay > 0.15 && n < dropoutChance * 0.55) {
+                // occasionally spawn a drifting particle instead of just vanishing
+                if (n2 < 0.05 * decay) {
+                    particles.push({
+                        x: x + cell / 2,
+                        y: y + cell / 2,
+                        vx: (0.15 + decay * 0.9) * cell * (0.4 + n2),
+                        vy: (n - 0.5) * cell * 0.6,
+                        life: 1,
+                        size: cell * (0.18 + 0.3 * n2),
+                        stripe: isCantonRow ? 'canton' : (row % 2 === 0 ? 'red' : 'white')
+                    });
+                }
+                continue; // cell is a gap / dropped out
+            }
+
+            // Compute color across the decay gradient: maroon -> coral -> white-hot
+            let color;
+            if (inCanton) {
+                // canton cells: deep maroon field, occasional bright "star" dot
+                const isStar = (hash(col, row, 5) > 0.86);
+                if (isStar) {
+                    const twinkle = 0.55 + 0.45 * Math.sin(t * 3 + col * 1.7 + row * 2.3);
+                    color = mixColor(CANTON_BLUE, WHITE, 0.55 + 0.45 * twinkle);
+                } else {
+                    color = mixColor(DARK_MAROON, CANTON_BLUE, 0.18);
+                }
+            } else if (isCantonRow) {
+                // top rows, right of canton: red stripe transitioning per decay
+                color = mixColor(DARK_MAROON, CORAL, Math.min(1, xFrac * 1.3));
+                color = mixColor(color, WHITE, decay * 0.6);
+            } else {
+                // lower stripes: alternate deep red / faded near-white
+                const isRedStripe = (row % 2 === 0);
+                const rowBase = isRedStripe ? MID_RED : mixColor(DARK_MAROON, WHITE, 0.55);
+                color = mixColor(rowBase, CORAL, Math.min(1, xFrac * 1.1));
+                color = mixColor(color, WHITE, decay * 0.6);
+            }
+
+            // Flicker: brighten cells stochastically to suggest voltage / strain
+            const flicker = (n2 > 0.965) ? (0.4 + 0.6 * jitter) : 0;
+            if (flicker > 0) {
+                color = mixColor(color, WHITE, flicker);
+            }
+
+            const alpha = 1 - decay * 0.35 * n; // slight fade before dropout
+
+            // Chromatic aberration on high-decay cells: split channels like glitch hover
+            if (decay > 0.35 && n2 > 0.7) {
+                const off = (decay - 0.35) * cell * 0.9;
+                ctx.fillStyle = `rgba(255,0,0,0.55)`;
+                ctx.fillRect(x - off, y, cell * 0.92, cell * 0.92);
+                ctx.fillStyle = `rgba(0,255,120,0.35)`;
+                ctx.fillRect(x + off * 0.6, y, cell * 0.92, cell * 0.92);
+                ctx.fillStyle = rgba(color, alpha * 0.8);
+                ctx.fillRect(x, y, cell * 0.92, cell * 0.92);
+            } else {
+                ctx.fillStyle = rgba(color, alpha);
+                ctx.fillRect(x, y, cell * 0.92, cell * 0.92);
+            }
+        }
+    }
+
+    // ─── Divider line: marks where degradation begins ───────────────────────
+    const dividerX = decayStart * W + Math.sin(t * 1.7) * cell * 0.15 * strainMix;
+    ctx.save();
+    ctx.globalAlpha = 0.16 + 0.10 * jitter;
+    ctx.strokeStyle = '#ff6b6b';
+    ctx.lineWidth = Math.max(1, 1 * dpr);
+    ctx.beginPath();
+    ctx.moveTo(dividerX, 0);
+    ctx.lineTo(dividerX, H);
+    ctx.stroke();
+    ctx.restore();
+
+    // ─── Drifting particles (escaped signal) ─────────────────────────────────
+    particles.forEach(p => {
+        p.x += p.vx * 0.016;
+        p.y += p.vy * 0.016;
+        p.life -= 0.012;
+    });
+    particles = particles.filter(p => p.life > 0 && p.x < W + cell * 4);
+
+    particles.forEach(p => {
+        const c = p.stripe === 'canton' ? mixColor(CANTON_BLUE, WHITE, 0.5)
+                 : p.stripe === 'red' ? CORAL
+                 : WHITE;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life) * 0.85;
+        ctx.fillStyle = rgba(c, 1);
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        ctx.restore();
+    });
+
+    // ─── Scanlines: faint horizontal strain lines, intensity breathes ────────
+    ctx.save();
+    ctx.globalAlpha = 0.035 + 0.03 * strain;
+    ctx.fillStyle = '#000';
+    const scanStep = Math.max(2, Math.round(2 * dpr));
+    for (let y = 0; y < H; y += scanStep * 2) {
+        ctx.fillRect(0, y, W, scanStep);
+    }
+    ctx.restore();
+
+    // Occasional full-width horizontal glitch tear
+    const tearChance = hash(0, 0, Math.floor(t * 10));
+    if (tearChance > 0.975) {
+        const ty = hash(1, 1, Math.floor(t * 10)) * H;
+        const th = cell * 0.4;
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        const shift = cell * 1.5;
+        ctx.drawImage(canvas, 0, ty, W, th, shift, ty, W, th);
+        ctx.restore();
+    }
+}
+
+// ─── ANIMATION LOOP ───────────────────────────────────────────────────────────
+function animate(ts) {
+    if (startT === null) startT = ts;
+    const t = (ts - startT) / 1000;
+
+    drawFlag(t);
+
+    animId = requestAnimationFrame(animate);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function start() {
+    if (animId) cancelAnimationFrame(animId);
+    resize();
+    startT = null;
+    animId = requestAnimationFrame(animate);
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(start, 80);
+});
+
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+} else {
+    start();
+}
+</script>
+</body>
+</html>

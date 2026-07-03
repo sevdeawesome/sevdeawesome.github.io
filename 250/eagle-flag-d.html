@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slow-Scan — Eagle Flag Figure D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family:'Rubik',sans-serif;
+    background:#1a1a1a;
+    color:#fff;
+    padding:16px 20px 14px;
+    overflow:hidden;
+    user-select:none;
+}
+#fig { width:100%; max-width:760px; margin:0 auto; }
+#stage {
+    position:relative;
+    width:100%;
+    border:1px solid rgba(255,255,255,0.07);
+}
+#cv { display:block; width:100%; height:330px; background:#1a1a1a; }
+/* faint CRT raster over everything */
+#stage::after {
+    content:'';
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0 1px, transparent 1px 3px);
+}
+</style>
+</head>
+<body>
+<div id="fig">
+    <div id="stage"><canvas id="cv" aria-label="A slow-scan television transmission painting an American flag and bald eagle line by line; each painted line decays into static until the scan beam returns to redraw it."></canvas></div>
+</div>
+
+<script>
+(function () {
+'use strict';
+const EAGLE_SRC = 'data:image/png;base64,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';
+
+// ── palette (style.md + granted navy exception) ──
+const BG        = '#1a1a1a';
+const CORAL     = '#ff6b6b';
+const CORAL_L   = '#ff8787';
+const NAVY      = '#24344d';   // canton field
+const NAVY_EDGE = '#41618c';   // eagle blue fringe (muted steel)
+const RED_STRIPE= '#6f2029';   // between the two maroons
+const WHT_STRIPE= '#3f3f3f';   // "white" stripe, kept dim
+const EAGLE_W   = '#f2f2f2';
+
+const PERIOD   = 7.5;   // seconds per full vertical scan
+const BAND_CSS = 4;     // decay-band height in css px
+const CSS_H    = 330;
+
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const stage = document.getElementById('stage');
+const cvs   = document.getElementById('cv');
+const ctx   = cvs.getContext('2d');
+
+let W = 0, H = 0, dpr = 1, bandH = 8, nBands = 0;
+let main = null, coralF = null, navyF = null, noiseC = null;
+let tear = null, corrupt = null;
+let eagleTints = null;
+
+function smooth(a, b, x) {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+}
+
+// tint the eagle silhouette (alpha mask) a flat color
+function tintEagle(img, color) {
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = color;
+    x.fillRect(0, 0, c.width, c.height);
+    return c;
+}
+
+// the "perfect frame": flag field + stars + eagle with baked mis-registration
+function buildMain() {
+    main = document.createElement('canvas');
+    main.width = W; main.height = H;
+    const x = main.getContext('2d');
+    x.fillStyle = BG; x.fillRect(0, 0, W, H);
+
+    const sh = H / 13;
+    for (let i = 0; i < 13; i++) {
+        x.globalAlpha = (i % 2 === 0) ? 0.92 : 0.55;
+        x.fillStyle = (i % 2 === 0) ? RED_STRIPE : WHT_STRIPE;
+        x.fillRect(0, Math.floor(i * sh), W, Math.ceil(sh) + 1);
+    }
+    x.globalAlpha = 1;
+
+    // canton
+    const cw = W * 0.38, ch = sh * 7;
+    x.fillStyle = NAVY; x.fillRect(0, 0, cw, ch);
+    // staggered star field
+    x.fillStyle = 'rgba(255,255,255,0.85)';
+    const rows = 6;
+    for (let r = 0; r < rows; r++) {
+        const cols = (r % 2 === 0) ? 7 : 6;
+        for (let c = 0; c < cols; c++) {
+            const sx = cw * ((c + 0.5 + (r % 2 ? 0.5 : 0)) / 7.2) + cw * 0.02;
+            const sy = ch * ((r + 0.5) / rows);
+            x.beginPath(); x.arc(sx, sy, 2.0 * dpr, 0, 6.2832); x.fill();
+        }
+    }
+
+    // eagle — red fringe left, blue fringe right, white body: literal RGB mis-registration
+    const eh = H * 0.92;
+    const ew = eh * (eagleTints.white.width / eagleTints.white.height);
+    const ex = W * 0.615 - ew / 2, ey = H * 0.5 - eh / 2;
+    const off = 2.2 * dpr;
+    x.globalAlpha = 0.85;
+    x.drawImage(eagleTints.coral, ex - off, ey, ew, eh);
+    x.drawImage(eagleTints.navy,  ex + off, ey + off * 0.4, ew, eh);
+    x.globalAlpha = 1;
+    x.drawImage(eagleTints.white, ex, ey, ew, eh);
+}
+
+// full-frame multiply tints, used for chromatic fringing at the beam
+function tintFrame(color) {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.drawImage(main, 0, 0);
+    x.globalCompositeOperation = 'multiply';
+    x.fillStyle = color;
+    x.fillRect(0, 0, W, H);
+    return c;
+}
+
+// static bed: brand-colored broadcast noise
+function buildNoise() {
+    const NH = 256;
+    noiseC = document.createElement('canvas');
+    noiseC.width = Math.max(2, W); noiseC.height = NH;
+    const x = noiseC.getContext('2d');
+    const id = x.createImageData(noiseC.width, NH);
+    const d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const r = Math.random();
+        let cr, cg, cb;
+        if (r < 0.10)      { const v = 40 + Math.random() * 150; cr = cg = cb = v; }
+        else if (r < 0.13) { cr = 92 + Math.random() * 70; cg = 32; cb = 40; }   // maroon fleck
+        else if (r < 0.15) { cr = 36; cg = 52; cb = 87; }                        // navy fleck
+        else               { const v = 24 + Math.random() * 16; cr = cg = cb = v; }
+        d[i] = cr; d[i+1] = cg; d[i+2] = cb; d[i+3] = 255;
+    }
+    x.putImageData(id, 0, 0);
+}
+
+function rebuild() {
+    const cssW = stage.clientWidth || 720;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = Math.max(2, Math.round(cssW * dpr));
+    H = Math.round(CSS_H * dpr);
+    cvs.width = W; cvs.height = H;
+    bandH = Math.max(2, Math.round(BAND_CSS * dpr));
+    nBands = Math.ceil(H / bandH);
+    tear = new Float32Array(nBands);
+    corrupt = new Uint8Array(nBands);
+    buildMain();
+    coralF = tintFrame(CORAL_L);
+    navyF  = tintFrame('#8fb0d8');
+    buildNoise();
+}
+
+// signal / noise strength as a function of line age (0 = just scanned, 1 = about to be rescanned)
+function envelope(age, cor) {
+    let sig, noi;
+    if (age < 0.045) { sig = 1; noi = 0; }
+    else {
+        const u = (age - 0.045) / 0.955;
+        sig = 0.03 + 0.97 * Math.pow(1 - u, 2.1);
+        noi = 0.05 + 0.55 * smooth(0.08, 0.80, u);
+    }
+    if (cor) { sig *= 0.22; noi = Math.max(noi, 0.58); }
+    return [sig, noi];
+}
+
+// ── one full render of the field at a given beam position ──
+function render(beamY, dropping, flash, firstPass) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+    const NH = noiseC.height;
+
+    for (let b = 0; b < nBands; b++) {
+        const y = b * bandH;
+        const h = Math.min(bandH, H - y);
+        const yc = y + h * 0.5;
+        const age = ((beamY - yc + H) % H) / H;
+        let sig, noi;
+        if (firstPass && yc > beamY) {
+            // never transmitted yet: nothing down there but carrier static
+            sig = 0; noi = 0.5 + Math.random() * 0.08;
+        } else {
+            const env = envelope(age, corrupt[b]);
+            sig = env[0]; noi = env[1];
+        }
+
+        let ox = tear[b];
+        if (age > 0.75) ox += (Math.random() - 0.5) * (age - 0.75) * 9 * dpr; // decrepit lines shiver
+
+        if (noi > 0.02) {
+            ctx.globalAlpha = Math.min(1, noi);
+            ctx.drawImage(noiseC, 0, (Math.random() * (NH - h)) | 0, W, h, ox * 0.5, y, W, h);
+        }
+        if (sig > 0.02) {
+            ctx.globalAlpha = Math.min(1, sig);
+            ctx.drawImage(main, 0, y, W, h, ox, y, W, h);
+        }
+        if (Math.abs(tear[b]) > 0.3) tear[b] *= 0.86; else tear[b] = 0;
+    }
+
+    // fresh zone at the beam: chromatic fringing, or corruption during dropout
+    const fh = Math.min(12 * dpr, beamY);
+    const fy = beamY - fh;
+    if (fh > 1) {
+        if (!dropping) {
+            ctx.globalAlpha = 0.32 + Math.random() * 0.18;
+            ctx.drawImage(coralF, 0, fy, W, fh, -2.5 * dpr, fy, W, fh);
+            ctx.drawImage(navyF,  0, fy, W, fh,  2.5 * dpr, fy, W, fh);
+            ctx.globalAlpha = 1;
+            ctx.drawImage(main, 0, fy, W, fh, 0, fy, W, fh);
+        } else {
+            ctx.globalAlpha = 0.75;
+            ctx.drawImage(noiseC, 0, (Math.random() * (noiseC.height - fh)) | 0, W, fh, 0, fy, W, fh);
+            ctx.globalAlpha = 0.2;
+            ctx.drawImage(main, 0, fy, W, fh, (Math.random() - 0.5) * 6 * dpr, fy, W, fh);
+        }
+    }
+
+    // the beam itself
+    const bh = 1.6 * dpr;
+    ctx.globalAlpha = (dropping ? 0.30 : 0.88) + Math.random() * 0.12;
+    ctx.fillStyle = '#ffffff';
+    if (dropping) {
+        // beam breaks into stuttering segments while signal is lost
+        let sx = 0;
+        while (sx < W) {
+            const seg = W * (0.05 + Math.random() * 0.14);
+            if (Math.random() > 0.4) ctx.fillRect(sx, beamY, seg, bh);
+            sx += seg + W * 0.03 * Math.random();
+        }
+    } else {
+        ctx.fillRect(0, beamY, W, bh);
+    }
+    ctx.globalAlpha = 0.32;
+    ctx.fillStyle = CORAL;
+    ctx.fillRect(0, beamY + bh, W, bh * 1.5);
+    ctx.fillRect(0, beamY - bh * 1.2, W, bh * 0.8);
+
+    if (flash > 0) {  // vertical retrace blink
+        ctx.globalAlpha = 0.045 * flash;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+    }
+    ctx.globalAlpha = 1;
+}
+
+// ── animation state ──
+let t0 = 0, lastY = 0, pass = 1, flash = 0;
+let dropUntil = -1, nextDrop = 0, nextTear = 0;
+
+function loop(now) {
+    if (!t0) { t0 = now; nextDrop = now + 5200; nextTear = now + 1600; }
+    const beamY = (((now - t0) / 1000 / PERIOD) % 1) * H;
+    if (beamY < lastY) { pass++; flash = 3; }
+    lastY = beamY;
+
+    const dropping = now < dropUntil;
+    if (!dropping && now >= nextDrop) {
+        dropUntil = now + 380 + Math.random() * 380;
+        nextDrop = dropUntil + 6500 + Math.random() * 6500;
+    }
+    if (now >= nextTear) {
+        const start = (Math.random() * nBands) | 0;
+        const len = 4 + (Math.random() * 11) | 0;
+        const amp = (3 + Math.random() * 14) * dpr * (Math.random() < 0.5 ? -1 : 1);
+        for (let b = start; b < Math.min(nBands, start + len); b++) {
+            tear[b] = amp * (0.6 + Math.random() * 0.7);
+        }
+        nextTear = now + 1000 + Math.random() * 2400;
+    }
+
+    // beam writes truth — or, during dropout, writes garbage it must fix next pass
+    const bi = Math.min(nBands - 1, (beamY / bandH) | 0);
+    corrupt[bi] = dropping ? 1 : 0;
+    if (bi > 0) corrupt[bi - 1] = dropping ? 1 : 0;
+
+    render(beamY, dropping, flash, pass === 1);
+    if (flash > 0) flash--;
+    requestAnimationFrame(loop);
+}
+
+function renderStatic() {
+    // one honest frame: beam two-thirds down, top already going to static
+    const beamY = H * 0.66;
+    for (let i = 0; i < 3; i++) { // a couple of frozen tears for texture
+        const start = (i * 0.27 + 0.1) * nBands | 0;
+        for (let b = start; b < start + 6 && b < nBands; b++) tear[b] = (i % 2 ? -1 : 1) * 7 * dpr;
+    }
+    render(beamY, false, 0, false);
+}
+
+// ── boot ──
+const img = new Image();
+const imgReady = new Promise(function (res, rej) {
+    img.onload = res; img.onerror = rej; img.src = EAGLE_SRC;
+});
+
+Promise.all([document.fonts.ready, imgReady]).then(function () {
+    eagleTints = {
+        coral: tintEagle(img, CORAL),
+        navy:  tintEagle(img, NAVY_EDGE),
+        white: tintEagle(img, EAGLE_W)
+    };
+    rebuild();
+    if (reduced) renderStatic();
+    else requestAnimationFrame(loop);
+});
+
+let rzTimer = null;
+window.addEventListener('resize', function () {
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(function () {
+        if (!eagleTints) return;
+        rebuild();
+        if (reduced) renderStatic();
+    }, 80);
+});
+})();
+</script>
+</body>
+</html>

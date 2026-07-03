@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AQUILA LIBERTATIS · 1776</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Rubik',sans-serif; font-weight:400;
+  background:#1a1a1a; color:#fff;
+  padding:16px 20px 14px; overflow:hidden;
+}
+.fig { width:100%; }
+canvas {
+  display:block; width:100%;
+  height:clamp(240px, calc(100vh - 92px), 620px);
+}
+.telemetry {
+  margin-top:7px; font-size:0.63rem; letter-spacing:0.08em;
+  color:rgba(255,255,255,0.35); white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis;
+}
+.telemetry .hot { color:#ff6b6b; }
+.telemetry .gold { color:rgba(255,215,0,0.75); }
+.fig-source {
+  margin-top:4px; font-size:0.63rem; letter-spacing:0.04em;
+  color:rgba(255,255,255,0.22);
+}
+</style>
+</head>
+<body>
+<div class="fig">
+  <canvas id="cv"></canvas>
+  <div class="telemetry" id="tel">signal: us_1776 &middot; celestial survey initializing&hellip;</div>
+  <div class="fig-source">fig. &mdash; survey plate XIII: fifty stars raised from the canton and charted as Aquila Libertatis; whatever the sky loses, the flag launches again.</div>
+</div>
+<script>
+'use strict';
+const EAGLE_SRC = 'data:image/png;base64,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';
+
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
+const telEl = document.getElementById('tel');
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- palette ----------
+const NAVY      = '96,124,163';   // muted desat navy for lines/labels
+const NAVY_DK   = '46,64,87';
+const CORAL     = '255,107,107';
+const MAROON    = '139,38,53';
+const GOLD      = '255,215,0';
+
+// ---------- state ----------
+let W = 0, H = 0, dpr = 1;
+let flagH = 0, skyH = 0, plate = {x:0, y:0, w:0, h:0};   // chart plate rect
+let eagleBox = {x:0, y:0, s:1};                           // mask->sky transform
+let maskReady = false, layoutReady = false, started = false;
+let eagleImg = null, maskW = 0, maskH = 0;
+let chosen = [];      // mask-space star sites [{mx,my,ext}]
+let edgesDef = [];    // [{a,b}]
+const N_STARS = 45;
+const N_SLOTS = 50;
+let stars = [];       // runtime star objects
+let edges = [];       // runtime edges {a,b,p}
+let slots = [];       // canton slots {x,y,departed}
+let bgStars = [];
+let pops = [];
+let layers = { chart:null, flag:null, ghost:null, sprite:null, spriteG:null };
+let roll = null;      // static roll event
+let nextEvtAt = 0;
+let buildDoneAt = 0;
+let lostCount = 0, sparesUsed = 0;
+let phaseWord = 'surveying';
+let lastTelAt = 0;
+let rafId = 0, lastT = 0;
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+function easeIO(u) { return u < 0.5 ? 4*u*u*u : 1 - Math.pow(-2*u + 2, 3)/2; }
+function easeO(u) { return 1 - Math.pow(1 - u, 3); }
+
+// ---------- mask sampling ----------
+function buildMask(img) {
+  maskW = img.width; maskH = img.height;
+  const oc = document.createElement('canvas');
+  oc.width = maskW; oc.height = maskH;
+  const octx = oc.getContext('2d');
+  octx.drawImage(img, 0, 0);
+  const d = octx.getImageData(0, 0, maskW, maskH).data;
+  const inside = (x, y) => x >= 0 && y >= 0 && x < maskW && y < maskH && d[(y*maskW + x)*4 + 3] > 128;
+
+  // edge candidates
+  const cand = [];
+  let cx = 0, cy = 0, cn = 0;
+  for (let y = 1; y < maskH - 1; y += 2) {
+    for (let x = 1; x < maskW - 1; x += 2) {
+      if (!inside(x, y)) continue;
+      cx += x; cy += y; cn++;
+      if (!inside(x+2, y) || !inside(x-2, y) || !inside(x, y+2) || !inside(x, y-2)) {
+        cand.push([x, y]);
+      }
+    }
+  }
+  cx /= cn; cy /= cn;
+
+  // greedy farthest-point pick: extremities first, then even spread
+  let seed = 0, best = -1;
+  for (let i = 0; i < cand.length; i++) {
+    const dx = cand[i][0] - cx, dy = cand[i][1] - cy;
+    const dd = dx*dx + dy*dy;
+    if (dd > best) { best = dd; seed = i; }
+  }
+  const picked = [seed];
+  const minD = new Float64Array(cand.length);
+  for (let i = 0; i < cand.length; i++) {
+    const dx = cand[i][0] - cand[seed][0], dy = cand[i][1] - cand[seed][1];
+    minD[i] = dx*dx + dy*dy;
+  }
+  while (picked.length < N_STARS) {
+    let bi = 0, bd = -1;
+    for (let i = 0; i < cand.length; i++) {
+      if (minD[i] > bd) { bd = minD[i]; bi = i; }
+    }
+    picked.push(bi);
+    for (let i = 0; i < cand.length; i++) {
+      const dx = cand[i][0] - cand[bi][0], dy = cand[i][1] - cand[bi][1];
+      const dd = dx*dx + dy*dy;
+      if (dd < minD[i]) minD[i] = dd;
+    }
+  }
+  chosen = picked.map((i, k) => ({ mx: cand[i][0], my: cand[i][1], ext: k }));
+
+  // edge validity: segment must hug the silhouette
+  const OFF = [[0,0],[6,0],[-6,0],[0,6],[0,-6],[5,5],[-5,5],[5,-5],[-5,-5]];
+  const nearIn = (x, y) => {
+    for (let k = 0; k < OFF.length; k++) {
+      if (inside(Math.round(x + OFF[k][0]), Math.round(y + OFF[k][1]))) return true;
+    }
+    return false;
+  };
+  const validEdge = (a, b) => {
+    for (let t = 0.18; t < 0.9; t += 0.16) {
+      const x = a.mx + (b.mx - a.mx)*t, y = a.my + (b.my - a.my)*t;
+      if (!nearIn(x, y)) return false;
+    }
+    return true;
+  };
+  const dist = (a, b) => Math.hypot(a.mx - b.mx, a.my - b.my);
+
+  // MST (Prim) with heavy penalty for chords across empty sky
+  const n = chosen.length;
+  const inTree = new Array(n).fill(false);
+  const cost = new Float64Array(n).fill(Infinity);
+  const link = new Int32Array(n).fill(-1);
+  const wgt = (i, j) => {
+    const dd = dist(chosen[i], chosen[j]);
+    return (validEdge(chosen[i], chosen[j]) && dd < 175) ? dd : dd * 8 + 800;
+  };
+  cost[0] = 0;
+  edgesDef = [];
+  for (let it = 0; it < n; it++) {
+    let u = -1, bc = Infinity;
+    for (let i = 0; i < n; i++) if (!inTree[i] && cost[i] < bc) { bc = cost[i]; u = i; }
+    inTree[u] = true;
+    if (link[u] >= 0) edgesDef.push({ a: link[u], b: u });
+    for (let v = 0; v < n; v++) {
+      if (inTree[v]) continue;
+      const w = wgt(u, v);
+      if (w < cost[v]) { cost[v] = w; link[v] = u; }
+    }
+  }
+  // a few short valid extras so the figure closes loops like a real chart
+  const has = new Set(edgesDef.map(e => Math.min(e.a,e.b) + ':' + Math.max(e.a,e.b)));
+  const deg = new Int32Array(n);
+  edgesDef.forEach(e => { deg[e.a]++; deg[e.b]++; });
+  const extras = [];
+  for (let i = 0; i < n; i++) {
+    const near = [];
+    for (let j = 0; j < n; j++) if (j !== i) near.push([dist(chosen[i], chosen[j]), j]);
+    near.sort((p, q) => p[0] - q[0]);
+    for (let k = 0; k < 2; k++) {
+      const [dd, j] = near[k];
+      const key = Math.min(i,j) + ':' + Math.max(i,j);
+      if (dd < 78 && !has.has(key) && deg[i] < 3 && deg[j] < 3 && validEdge(chosen[i], chosen[j])) {
+        has.add(key); extras.push({ a: i, b: j }); deg[i]++; deg[j]++;
+      }
+    }
+  }
+  edgesDef = edgesDef.concat(extras.slice(0, 16));
+  maskReady = true;
+}
+
+// ---------- layout / layers ----------
+function makeSprite(rgb) {
+  const s = document.createElement('canvas');
+  s.width = 48; s.height = 48;
+  const c = s.getContext('2d');
+  const g = c.createRadialGradient(24, 24, 0, 24, 24, 24);
+  g.addColorStop(0, 'rgba(' + rgb + ',1)');
+  g.addColorStop(0.18, 'rgba(' + rgb + ',0.85)');
+  g.addColorStop(0.45, 'rgba(' + rgb + ',0.18)');
+  g.addColorStop(1, 'rgba(' + rgb + ',0)');
+  c.fillStyle = g;
+  c.fillRect(0, 0, 48, 48);
+  return s;
+}
+
+function buildChartLayer() {
+  const L = document.createElement('canvas');
+  L.width = W * dpr; L.height = H * dpr;
+  const c = L.getContext('2d');
+  c.scale(dpr, dpr);
+  const p = plate;
+
+  // plate frame: thin double rule + survey ticks
+  c.strokeStyle = 'rgba(' + NAVY + ',0.34)';
+  c.lineWidth = 1;
+  c.strokeRect(p.x + 0.5, p.y + 0.5, p.w, p.h);
+  c.strokeStyle = 'rgba(' + NAVY + ',0.14)';
+  c.strokeRect(p.x + 3.5, p.y + 3.5, p.w - 7, p.h - 7);
+  c.strokeStyle = 'rgba(' + NAVY + ',0.4)';
+  c.beginPath();
+  for (let x = p.x + 24; x < p.x + p.w - 8; x += 24) {
+    const maj = ((x - p.x) / 24) % 4 === 0;
+    c.moveTo(x + 0.5, p.y); c.lineTo(x + 0.5, p.y + (maj ? 7 : 4));
+    c.moveTo(x + 0.5, p.y + p.h); c.lineTo(x + 0.5, p.y + p.h - (maj ? 7 : 4));
+  }
+  for (let y = p.y + 24; y < p.y + p.h - 8; y += 24) {
+    const maj = ((y - p.y) / 24) % 4 === 0;
+    c.moveTo(p.x, y + 0.5); c.lineTo(p.x + (maj ? 7 : 4), y + 0.5);
+    c.moveTo(p.x + p.w, y + 0.5); c.lineTo(p.x + p.w - (maj ? 7 : 4), y + 0.5);
+  }
+  c.stroke();
+
+  // right ascension marks along the top
+  c.font = '400 7px Rubik, sans-serif';
+  c.fillStyle = 'rgba(' + NAVY + ',0.55)';
+  c.textAlign = 'center';
+  const raStart = 18;
+  for (let k = 1; k <= 4; k++) {
+    const x = p.x + (p.w * k) / 5;
+    c.fillText((raStart + k) + 'h', x, p.y + 15);
+  }
+  // declination along the right edge
+  c.textAlign = 'right';
+  for (let k = 1; k <= 3; k++) {
+    const y = p.y + (p.h * k) / 4;
+    c.fillText('+' + (60 - k * 15) + '°', p.x + p.w - 8, y + 2);
+  }
+
+  // declination arcs (great circles from below the horizon) + hour lines
+  const ccx = W * 0.5, ccy = p.y + p.h + skyH * 2.2;
+  c.save();
+  c.beginPath();
+  c.rect(p.x + 1, p.y + 1, p.w - 2, p.h - 2);
+  c.clip();
+  c.strokeStyle = 'rgba(' + NAVY + ',0.16)';
+  c.lineWidth = 1;
+  for (let k = 0; k < 4; k++) {
+    const r = skyH * (1.62 + k * 0.34);
+    c.beginPath();
+    c.arc(ccx, ccy, r * 1.55, Math.PI * 1.15, Math.PI * 1.85);
+    c.stroke();
+  }
+  c.setLineDash([2, 5]);
+  for (let k = -3; k <= 3; k++) {
+    const ang = -Math.PI / 2 + k * 0.17;
+    c.beginPath();
+    c.moveTo(ccx, ccy);
+    c.lineTo(ccx + Math.cos(ang) * skyH * 3.4, ccy + Math.sin(ang) * skyH * 3.4);
+    c.stroke();
+  }
+  c.setLineDash([]);
+  c.restore();
+
+  // title block
+  c.textAlign = 'left';
+  try { c.letterSpacing = '3px'; } catch (e) {}
+  c.font = '500 11px Rubik, sans-serif';
+  c.fillStyle = 'rgba(255,255,255,0.6)';
+  c.fillText('AQUILA LIBERTATIS · 1776', p.x + 14, p.y + 24);
+  try { c.letterSpacing = '1.5px'; } catch (e) {}
+  c.font = '400 7px Rubik, sans-serif';
+  c.fillStyle = 'rgba(' + NAVY + ',0.72)';
+  c.fillText('THE EAGLE OF LIBERTY · SURVEY PLATE XIII · EPOCH J1776.0', p.x + 14, p.y + 37);
+  try { c.letterSpacing = '0px'; } catch (e) {}
+
+  // magnitude legend, bottom-right of plate
+  const lx = p.x + p.w - 118, ly = p.y + p.h - 14;
+  c.fillStyle = 'rgba(' + NAVY + ',0.62)';
+  c.fillText('MAG', lx, ly + 2.5);
+  for (let k = 0; k < 4; k++) {
+    c.fillStyle = 'rgba(255,255,255,' + (0.75 - k * 0.16) + ')';
+    c.beginPath();
+    c.arc(lx + 30 + k * 20, ly, 2.6 - k * 0.55, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = 'rgba(' + NAVY + ',0.55)';
+    c.fillText(String(k + 1), lx + 36 + k * 20, ly + 2.5);
+  }
+  return L;
+}
+
+function buildFlagLayer() {
+  const L = document.createElement('canvas');
+  L.width = W * dpr; L.height = (flagH + 8) * dpr;
+  const c = L.getContext('2d');
+  c.scale(dpr, dpr);
+  const sh = flagH / 13;
+  for (let i = 0; i < 13; i++) {
+    c.fillStyle = (i % 2 === 0) ? 'rgba(' + MAROON + ',0.88)' : 'rgba(224,220,214,0.34)';
+    c.fillRect(0, 4 + i * sh, W, sh + 0.6);
+  }
+  // canton
+  const cw = Math.min(W * 0.36, 300), ch = sh * 7;
+  c.fillStyle = '#24344d';
+  c.fillRect(0, 4, cw, ch);
+  c.fillStyle = 'rgba(46,64,87,0.5)';
+  c.fillRect(0, 4, cw, 1);
+  return L;
+}
+
+function buildGhostLayer() {
+  const L = document.createElement('canvas');
+  L.width = Math.ceil(maskW * eagleBox.s * dpr);
+  L.height = Math.ceil(maskH * eagleBox.s * dpr);
+  const c = L.getContext('2d');
+  c.drawImage(eagleImg, 0, 0, L.width, L.height);
+  c.globalCompositeOperation = 'source-in';
+  c.fillStyle = '#41587a';
+  c.fillRect(0, 0, L.width, L.height);
+  return L;
+}
+
+function toSky(mx, my) {
+  return [eagleBox.x + mx * eagleBox.s, eagleBox.y + my * eagleBox.s];
+}
+
+function layout() {
+  const cw = canvas.clientWidth, ch = canvas.clientHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = cw; H = ch;
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  flagH = Math.max(52, Math.min(76, H * 0.19));
+  skyH = H - flagH - 6;
+  plate = { x: 6, y: 4, w: W - 12, h: skyH - 4 };
+
+  // eagle placement in the sky
+  const availW = plate.w * 0.68, availH = plate.h - 46;
+  const s = Math.min(availW / maskW, availH / maskH);
+  eagleBox = {
+    s: s,
+    x: plate.x + (plate.w - maskW * s) * 0.60,
+    y: plate.y + 36 + (availH - maskH * s) * 0.5
+  };
+
+  // canton slots (9 rows: 6/5 alternating = 50)
+  slots = [];
+  const cw2 = Math.min(W * 0.36, 300), sh = flagH / 13, chh = sh * 7;
+  const rows = 9;
+  for (let r = 0; r < rows; r++) {
+    const cols = (r % 2 === 0) ? 6 : 5;
+    for (let k = 0; k < cols; k++) {
+      const x = cw2 * ((r % 2 === 0 ? 0.5 : 1.0) + k) / 6.5;
+      const y = chh * (r + 1) / (rows + 1);
+      slots.push({ x: x + cw2 * 0.04, y: y, departed: false });
+    }
+  }
+
+  // background starfield
+  bgStars = [];
+  const nBg = Math.round((W * skyH) / 1050);
+  for (let i = 0; i < nBg; i++) {
+    bgStars.push({
+      x: rand(plate.x + 4, plate.x + plate.w - 4),
+      y: rand(plate.y + 4, plate.y + plate.h - 4),
+      r: Math.random() < 0.12 ? 1.5 : 1,
+      a: rand(0.08, 0.36),
+      ph: rand(0, Math.PI * 2),
+      sp: rand(0.3, 1.4)
+    });
+  }
+
+  layers.chart = buildChartLayer();
+  layers.flag = buildFlagLayer();
+  layers.sprite = makeSprite('255,255,255');
+  layers.spriteG = makeSprite(GOLD);
+  if (maskReady) layers.ghost = buildGhostLayer();
+  layoutReady = true;
+}
+
+// ---------- runtime stars ----------
+const GREEK = ['α', 'β', 'γ', 'δ', 'ε', 'ζ'];
+function initStars(now) {
+  stars = [];
+  // launch order sweeps left -> right across the sky
+  const order = chosen.map((p, i) => i).sort((a, b) => chosen[a].mx - chosen[b].mx);
+  for (let k = 0; k < order.length; k++) {
+    const i = order[k];
+    const site = chosen[i];
+    const [tx, ty] = toSky(site.mx, site.my);
+    const slot = slots[k];
+    const label = site.ext < 6 ? GREEK[site.ext] : null;
+    stars.push({
+      idx: i, tx: tx, ty: ty,
+      slot: k,
+      state: 'home',
+      launchAt: now + 1.1 + k * 0.235 + rand(0, 0.08),
+      x: 0, y: 0,
+      t0: 0, dur: rand(1.5, 2.0),
+      fx: 0, fy: 0, cx2: 0, cy2: 0,
+      size: (site.ext < 8 ? rand(1.15, 1.35) : rand(0.75, 1.1)),
+      ph: rand(0, Math.PI * 2),
+      alpha: site.ext === 0,
+      label: label,
+      mag: label ? (1.2 + site.ext * 0.5 + rand(0, 0.3)).toFixed(1) : null,
+      vx: 0, vy: 0, fade: 1,
+      looseT0: 0, outcome: null, rx: 0, ry: 0
+    });
+  }
+  edges = [];
+  const idxToStar = {};
+  stars.forEach((s, j) => { idxToStar[s.idx] = j; });
+  edgesDef.forEach(e => {
+    edges.push({ a: idxToStar[e.a], b: idxToStar[e.b], p: 0 });
+  });
+  buildDoneAt = now + 1.1 + order.length * 0.235 + 2.2;
+  nextEvtAt = buildDoneAt + 2.6;
+}
+
+function beginFlight(s, fromX, fromY, now) {
+  s.state = 'flying';
+  s.t0 = now;
+  s.fx = fromX; s.fy = fromY;
+  s.cx2 = (fromX + s.tx) / 2 + rand(-70, 70);
+  s.cy2 = Math.min(fromY, s.ty) - rand(30, 90);
+  s.fade = 1;
+}
+
+function knockStar(now) {
+  const candidates = stars.filter(s => s.state === 'placed' && !s.alpha && !s.label);
+  if (!candidates.length) return;
+  const s = candidates[(Math.random() * candidates.length) | 0];
+  s.state = 'loose';
+  s.looseT0 = now;
+  s.x = s.tx; s.y = s.ty;
+  const ang = rand(0, Math.PI * 2);
+  s.vx = Math.cos(ang) * rand(15, 24);
+  s.vy = Math.sin(ang) * rand(15, 24) - 7;
+  s.outcome = (sparesUsed < 5 && Math.random() < 0.45) ? 'replace' : 'return';
+}
+
+function updateStars(now, dt) {
+  for (const s of stars) {
+    if (s.state === 'home') {
+      if (now >= s.launchAt) {
+        const sl = slots[s.slot];
+        sl.departed = true;
+        beginFlight(s, sl.x, H - flagH - 4 + sl.y, now);
+      }
+    } else if (s.state === 'flying') {
+      const u = Math.min(1, (now - s.t0) / s.dur);
+      const e = easeIO(u);
+      const a = 1 - e;
+      s.x = a * a * s.fx + 2 * a * e * s.cx2 + e * e * s.tx;
+      s.y = a * a * s.fy + 2 * a * e * s.cy2 + e * e * s.ty;
+      if (u >= 1) {
+        s.state = 'placed';
+        s.x = s.tx; s.y = s.ty;
+        pops.push({ x: s.tx, y: s.ty, t0: now, gold: s.alpha });
+      }
+    } else if (s.state === 'loose') {
+      s.x += s.vx * dt; s.y += s.vy * dt;
+      s.vx *= 0.995; s.vy *= 0.995;
+      const age = now - s.looseT0;
+      if (s.outcome === 'return' && age > 2.1) {
+        s.state = 'returning'; s.t0 = now; s.rx = s.x; s.ry = s.y;
+      } else if (s.outcome === 'replace' && age > 1.6) {
+        s.state = 'fading'; s.t0 = now;
+      }
+    } else if (s.state === 'returning') {
+      const u = Math.min(1, (now - s.t0) / 1.3);
+      const e = easeIO(u);
+      s.x = s.rx + (s.tx - s.rx) * e;
+      s.y = s.ry + (s.ty - s.ry) * e;
+      if (u >= 1) { s.state = 'placed'; pops.push({ x: s.tx, y: s.ty, t0: now, gold: false }); }
+    } else if (s.state === 'fading') {
+      s.x += s.vx * dt; s.y += s.vy * dt;
+      s.fade = Math.max(0, 1 - (now - s.t0) / 1.2);
+      if (s.fade <= 0) {
+        // the flag replenishes the sky: launch a spare from the canton
+        lostCount++;
+        const spareIdx = 45 + sparesUsed;
+        sparesUsed++;
+        if (spareIdx < slots.length) {
+          const sl = slots[spareIdx];
+          sl.departed = true;
+          s.dur = rand(1.7, 2.1);
+          beginFlight(s, sl.x, H - flagH - 4 + sl.y, now);
+        } else {
+          s.state = 'returning'; s.t0 = now; s.rx = s.x; s.ry = s.y; s.fade = 1;
+        }
+      }
+    }
+  }
+  // edges
+  for (const e of edges) {
+    const A = stars[e.a], B = stars[e.b];
+    const okA = A.state === 'placed', okB = B.state === 'placed';
+    if (okA && okB) {
+      e.p = Math.min(1, e.p + dt * 1.7);
+    } else if ((A.state === 'loose' || B.state === 'loose') || (A.state === 'returning' || B.state === 'returning')) {
+      const L = (A.state === 'loose' || A.state === 'returning') ? A : B;
+      const disp = Math.hypot(L.x - L.tx, L.y - L.ty);
+      if (disp > 34) e.p = Math.max(0, e.p - dt * 5);
+    } else {
+      e.p = Math.max(0, e.p - dt * 4);
+    }
+  }
+}
+
+// ---------- events ----------
+function updateEvents(now) {
+  if (now >= nextEvtAt) {
+    roll = {
+      t0: now, dur: rand(1.3, 1.7),
+      slices: [ (Math.random() * 44) | 0, (Math.random() * 44) | 0, (Math.random() * 44) | 0 ]
+    };
+    if (Math.random() < 0.62) knockStar(now + 0.001);
+    nextEvtAt = now + rand(5.5, 9.5);
+  }
+  if (roll && now - roll.t0 > roll.dur) roll = null;
+}
+
+// ---------- draw ----------
+function drawFlag(now) {
+  const fy = H - flagH - 4;
+  const nSl = 44, sw = W / nSl;
+  const rollAct = roll && (now - roll.t0) < roll.dur * 0.7;
+  for (let i = 0; i < nSl; i++) {
+    const dy = Math.sin(i * 0.32 + now * 1.4) * 1.3;
+    let dx = 0, hot = false;
+    if (rollAct && roll.slices.indexOf(i) >= 0) { dx = rand(-4, 4); hot = true; }
+    ctx.drawImage(layers.flag,
+      i * sw * dpr, 0, sw * dpr, (flagH + 8) * dpr,
+      i * sw + dx, fy + dy - 4, sw, flagH + 8);
+    if (hot) {
+      ctx.fillStyle = 'rgba(' + CORAL + ',0.14)';
+      ctx.fillRect(i * sw + dx, fy + dy, sw, flagH);
+    }
+  }
+  // canton stars: present, or hollow where departed
+  for (let k = 0; k < slots.length; k++) {
+    const sl = slots[k];
+    const dy = Math.sin((sl.x / sw) * 0.32 + now * 1.4) * 1.3;
+    const y = fy + sl.y + dy;
+    if (sl.departed) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.arc(sl.x, y, 1.3, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(sl.x, y, 1.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function drawRoll(now) {
+  if (!roll) return 0;
+  const u = (now - roll.t0) / roll.dur;
+  const bandY = plate.y + plate.h - (plate.h + 50) * easeO(u);
+  const bandH = 30;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(plate.x + 1, plate.y + 1, plate.w - 2, plate.h - 2);
+  ctx.clip();
+  for (let i = 0; i < 64; i++) {
+    const y = bandY + Math.random() * bandH;
+    const x = plate.x + Math.random() * plate.w;
+    const w2 = rand(8, 90);
+    ctx.fillStyle = (i % 3 === 0)
+      ? 'rgba(' + CORAL + ',' + rand(0.18, 0.45) + ')'
+      : 'rgba(' + MAROON + ',' + rand(0.3, 0.7) + ')';
+    ctx.fillRect(x, y, w2, i % 4 === 0 ? 2 : 1);
+  }
+  ctx.fillStyle = 'rgba(' + CORAL + ',0.06)';
+  ctx.fillRect(plate.x, bandY, plate.w, bandH);
+  ctx.fillStyle = 'rgba(' + CORAL + ',0.16)';
+  ctx.fillRect(plate.x, bandY, plate.w, 1);
+  ctx.fillRect(plate.x, bandY + bandH, plate.w, 1);
+  ctx.restore();
+  return bandY;
+}
+
+function draw(now) {
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(0, 0, W, H);
+
+  // sky depth: barely-there vertical gradient inside the plate
+  const g = ctx.createLinearGradient(0, plate.y, 0, plate.y + plate.h);
+  g.addColorStop(0, 'rgba(' + NAVY_DK + ',0.10)');
+  g.addColorStop(1, 'rgba(' + NAVY_DK + ',0.26)');
+  ctx.fillStyle = g;
+  ctx.fillRect(plate.x, plate.y, plate.w, plate.h);
+
+  // background starfield
+  for (const b of bgStars) {
+    const tw = b.a * (0.72 + 0.28 * Math.sin(now * b.sp + b.ph));
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(b.x, b.y, b.r, b.r);
+  }
+  ctx.globalAlpha = 1;
+
+  // ghost eagle underlay resolves as the chart fills in
+  let placedN = 0;
+  for (const s of stars) if (s.state === 'placed') placedN++;
+  if (layers.ghost) {
+    ctx.globalAlpha = 0.02 + 0.062 * (placedN / N_STARS);
+    ctx.drawImage(layers.ghost, eagleBox.x, eagleBox.y, maskW * eagleBox.s, maskH * eagleBox.s);
+    ctx.globalAlpha = 1;
+  }
+
+  // chart plate (frame, arcs, titles)
+  ctx.drawImage(layers.chart, 0, 0, W, H);
+
+  // static roll (behind lines' jitter decision)
+  const bandY = drawRoll(now);
+
+  // constellation edges
+  ctx.lineWidth = 1;
+  for (const e of edges) {
+    if (e.p <= 0.01) continue;
+    const A = stars[e.a], B = stars[e.b];
+    const ax = A.state === 'placed' ? A.tx : A.x;
+    const ay = A.state === 'placed' ? A.ty : A.y;
+    const bx = B.state === 'placed' ? B.tx : B.x;
+    const by = B.state === 'placed' ? B.ty : B.y;
+    let jx = 0, jy = 0, alpha = 0.42;
+    if (roll && bandY && Math.min(ay, by) - 14 < bandY && bandY < Math.max(ay, by) + 14) {
+      if (Math.random() < 0.35) continue;       // line breaks in the static
+      jx = rand(-1.6, 1.6); jy = rand(-1.2, 1.2);
+      alpha = 0.3;
+    }
+    const loose = A.state !== 'placed' || B.state !== 'placed';
+    if (loose) {
+      alpha = 0.22 + 0.18 * Math.random();
+      ctx.setLineDash([3, 4]);
+    }
+    ctx.strokeStyle = 'rgba(' + NAVY + ',' + alpha + ')';
+    ctx.beginPath();
+    ctx.moveTo(ax + jx, ay + jy);
+    ctx.lineTo(ax + (bx - ax) * e.p + jx, ay + (by - ay) * e.p + jy);
+    ctx.stroke();
+    if (loose) ctx.setLineDash([]);
+  }
+
+  // survey guide for a returning star: faint arc back to its seat
+  for (const s of stars) {
+    if (s.state === 'returning') {
+      ctx.strokeStyle = 'rgba(' + NAVY + ',0.3)';
+      ctx.setLineDash([1, 4]);
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.tx, s.ty);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // flying trails
+  for (const s of stars) {
+    if (s.state !== 'flying' && s.state !== 'fading') continue;
+    const u = Math.min(1, (now - s.t0) / s.dur);
+    if (s.state === 'flying' && u > 0.02) {
+      const e2 = easeIO(Math.max(0, u - 0.07)), a2 = 1 - e2;
+      const px = a2 * a2 * s.fx + 2 * a2 * e2 * s.cx2 + e2 * e2 * s.tx;
+      const py = a2 * a2 * s.fy + 2 * a2 * e2 * s.cy2 + e2 * e2 * s.ty;
+      ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(s.x, s.y);
+      ctx.stroke();
+    }
+  }
+
+  // stars
+  for (const s of stars) {
+    if (s.state === 'home') continue;
+    const tw = 0.8 + 0.2 * Math.sin(now * 1.7 + s.ph);
+    let a = s.fade * tw;
+    if (s.state === 'loose') a *= (Math.random() < 0.22 ? 0.35 : 1);
+    const sz = (s.alpha ? 16 : 10.5) * s.size;
+    ctx.globalAlpha = Math.max(0, Math.min(1, a));
+    ctx.drawImage(s.alpha ? layers.spriteG : layers.sprite, s.x - sz / 2, s.y - sz / 2, sz, sz);
+    if (s.alpha && s.state === 'placed') {
+      // diffraction cross on the alpha star
+      ctx.strokeStyle = 'rgba(' + GOLD + ',' + (0.35 * tw) + ')';
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(s.x - 9, s.y); ctx.lineTo(s.x + 9, s.y);
+      ctx.moveTo(s.x, s.y - 9); ctx.lineTo(s.x, s.y + 9);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // labels appear once seated
+    if (s.label && s.state === 'placed') {
+      ctx.font = '400 8px Rubik, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = s.alpha ? 'rgba(' + GOLD + ',0.68)' : 'rgba(' + NAVY + ',0.78)';
+      ctx.fillText(s.label + ' · ' + s.mag, s.x + 7, s.y + 3);
+    }
+  }
+
+  // arrival pops
+  for (let i = pops.length - 1; i >= 0; i--) {
+    const p = pops[i];
+    const u = (now - p.t0) / 0.55;
+    if (u >= 1) { pops.splice(i, 1); continue; }
+    ctx.strokeStyle = p.gold
+      ? 'rgba(' + GOLD + ',' + (0.5 * (1 - u)) + ')'
+      : 'rgba(255,255,255,' + (0.4 * (1 - u)) + ')';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2 + u * 11, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  drawFlag(now);
+}
+
+// ---------- telemetry ----------
+function updateTelemetry(now) {
+  if (now - lastTelAt < 0.4) return;
+  lastTelAt = now;
+  let placedN = 0;
+  for (const s of stars) if (s.state === 'placed') placedN++;
+  let sump = 0;
+  for (const e of edges) sump += e.p;
+  const integ = edges.length ? Math.round((sump / edges.length) * 100) : 0;
+  let disturbed = false;
+  for (const s of stars) {
+    if (s.state === 'loose' || s.state === 'fading' || s.state === 'returning') disturbed = true;
+  }
+  if (placedN < N_STARS - 2 && lostCount === 0 && now < buildDoneAt) phaseWord = 'surveying';
+  else if (disturbed || roll) phaseWord = 're-acquiring';
+  else phaseWord = 'charted';
+  telEl.innerHTML =
+    'signal: us_1776 &middot; plate XIII &middot; ' + phaseWord +
+    ' &middot; stars charted <span class="hot">' + placedN + '/' + N_STARS + '</span>' +
+    ' &middot; lost&nbsp;/&nbsp;relaunched <span class="hot">' + lostCount + '</span>' +
+    ' &middot; map integrity <span class="hot">' + integ + '%</span>' +
+    ' &middot; α <span class="gold">Libertas</span>';
+}
+
+// ---------- loop ----------
+function frame(ms) {
+  const now = ms / 1000;
+  const dt = Math.min(0.05, now - lastT || 0.016);
+  lastT = now;
+  updateEvents(now);
+  updateStars(now, dt);
+  draw(now);
+  updateTelemetry(now);
+  rafId = requestAnimationFrame(frame);
+}
+
+function staticFrame() {
+  // reduced motion: the fully charted sky, one quiet frame
+  for (let k = 0; k < stars.length; k++) {
+    const s = stars[k];
+    s.state = 'placed'; s.x = s.tx; s.y = s.ty;
+    slots[s.slot].departed = true;
+  }
+  for (const e of edges) e.p = 1;
+  draw(1.2);
+  let placedN = N_STARS;
+  telEl.innerHTML =
+    'signal: us_1776 &middot; plate XIII &middot; charted &middot; stars charted <span class="hot">' +
+    placedN + '/' + N_STARS + '</span> &middot; map integrity <span class="hot">100%</span>' +
+    ' &middot; α <span class="gold">Libertas</span>';
+}
+
+function start() {
+  if (started || !maskReady || !layoutReady) return;
+  started = true;
+  layers.ghost = buildGhostLayer();
+  if (REDUCED) {
+    initStars(0);
+    staticFrame();
+    return;
+  }
+  initStars(performance.now() / 1000);
+  rafId = requestAnimationFrame(frame);
+}
+
+// ---------- boot ----------
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const keep = stars.map(s => s.state);
+    layout();
+    if (started && maskReady) {
+      layers.ghost = buildGhostLayer();
+      // re-seat targets from mask coords
+      const order = stars.map(s => s.idx);
+      for (let k = 0; k < stars.length; k++) {
+        const site = chosen[order[k]];
+        const [tx, ty] = toSky(site.mx, site.my);
+        stars[k].tx = tx; stars[k].ty = ty;
+        if (keep[k] === 'placed') { stars[k].x = tx; stars[k].y = ty; }
+      }
+      if (REDUCED) staticFrame();
+    }
+  }, 80);
+});
+
+const eagle = new Image();
+eagle.onload = () => {
+  eagleImg = eagle;
+  buildMask(eagle);
+  start();
+};
+eagle.src = EAGLE_SRC;
+
+document.fonts.ready.then(() => {
+  layout();
+  start();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slow-Scan — Flag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family:'Rubik',sans-serif;
+    background:#1a1a1a;
+    color:#fff;
+    padding:16px 20px 14px;
+    overflow:hidden;
+    user-select:none;
+}
+#fig { width:100%; max-width:760px; margin:0 auto; }
+#stage {
+    position:relative;
+    width:100%;
+    border:1px solid rgba(255,255,255,0.07);
+}
+#cv { display:block; width:100%; height:330px; background:#1a1a1a; }
+/* faint CRT raster over everything */
+#stage::after {
+    content:'';
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0 1px, transparent 1px 3px);
+}
+.telemetry {
+    margin-top:9px;
+    font-size:0.63rem;
+    letter-spacing:0.08em;
+    color:rgba(255,255,255,0.35);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.telemetry .hot { color:#ff6b6b; }
+.telemetry .stat { color:rgba(255,255,255,0.55); transition:color .2s; }
+.telemetry .stat.reacq { color:#ff6b6b; }
+.fig-source {
+    margin-top:5px;
+    font-size:0.63rem;
+    letter-spacing:0.03em;
+    color:rgba(255,255,255,0.22);
+}
+</style>
+</head>
+<body>
+<div id="fig">
+    <div id="stage"><canvas id="cv" aria-label="A slow-scan television transmission painting an American flag line by line; each painted line decays into static until the scan beam returns to redraw it."></canvas></div>
+    <div class="telemetry">signal: us_1776 &middot; slow-scan &middot; pass <span class="hot" id="tPass">0001</span> &middot; line <span class="hot" id="tLine">000/330</span> &middot; carrier <span class="hot" id="tCar">&minus;41.2 dBm</span> &middot; re-tx 7.5 s &middot; <span class="stat" id="tStat">LOCK</span></div>
+    <div class="fig-source">nothing in this frame is stored. the picture exists only for as long as it keeps being sent.</div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+// ── palette (style.md + granted navy exception) ──
+const BG        = '#1a1a1a';
+const CORAL     = '#ff6b6b';
+const CORAL_L   = '#ff8787';
+const NAVY      = '#24344d';   // canton field
+const RED_STRIPE= '#6f2029';   // between the two maroons
+const WHT_STRIPE= '#3f3f3f';   // "white" stripe, kept dim
+
+const PERIOD   = 7.5;   // seconds per full vertical scan
+const BAND_CSS = 4;     // decay-band height in css px
+const CSS_H    = 330;
+
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const stage = document.getElementById('stage');
+const cvs   = document.getElementById('cv');
+const ctx   = cvs.getContext('2d');
+const tPass = document.getElementById('tPass');
+const tLine = document.getElementById('tLine');
+const tCar  = document.getElementById('tCar');
+const tStat = document.getElementById('tStat');
+
+let W = 0, H = 0, dpr = 1, bandH = 8, nBands = 0;
+let main = null, coralF = null, navyF = null, noiseC = null;
+let tear = null, corrupt = null;
+
+function smooth(a, b, x) {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+}
+
+// the "perfect frame": flag field + stars
+function buildMain() {
+    main = document.createElement('canvas');
+    main.width = W; main.height = H;
+    const x = main.getContext('2d');
+    x.fillStyle = BG; x.fillRect(0, 0, W, H);
+
+    const sh = H / 13;
+    for (let i = 0; i < 13; i++) {
+        x.globalAlpha = (i % 2 === 0) ? 0.92 : 0.55;
+        x.fillStyle = (i % 2 === 0) ? RED_STRIPE : WHT_STRIPE;
+        x.fillRect(0, Math.floor(i * sh), W, Math.ceil(sh) + 1);
+    }
+    x.globalAlpha = 1;
+
+    // canton
+    const cw = W * 0.38, ch = sh * 7;
+    x.fillStyle = NAVY; x.fillRect(0, 0, cw, ch);
+    // staggered star field
+    x.fillStyle = 'rgba(255,255,255,0.85)';
+    const rows = 6;
+    for (let r = 0; r < rows; r++) {
+        const cols = (r % 2 === 0) ? 7 : 6;
+        for (let c = 0; c < cols; c++) {
+            const sx = cw * ((c + 0.5 + (r % 2 ? 0.5 : 0)) / 7.2) + cw * 0.02;
+            const sy = ch * ((r + 0.5) / rows);
+            x.beginPath(); x.arc(sx, sy, 2.0 * dpr, 0, 6.2832); x.fill();
+        }
+    }
+}
+
+// full-frame multiply tints, used for chromatic fringing at the beam
+function tintFrame(color) {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.drawImage(main, 0, 0);
+    x.globalCompositeOperation = 'multiply';
+    x.fillStyle = color;
+    x.fillRect(0, 0, W, H);
+    return c;
+}
+
+// static bed: brand-colored broadcast noise
+function buildNoise() {
+    const NH = 256;
+    noiseC = document.createElement('canvas');
+    noiseC.width = Math.max(2, W); noiseC.height = NH;
+    const x = noiseC.getContext('2d');
+    const id = x.createImageData(noiseC.width, NH);
+    const d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const r = Math.random();
+        let cr, cg, cb;
+        if (r < 0.10)      { const v = 40 + Math.random() * 150; cr = cg = cb = v; }
+        else if (r < 0.13) { cr = 92 + Math.random() * 70; cg = 32; cb = 40; }   // maroon fleck
+        else if (r < 0.15) { cr = 36; cg = 52; cb = 87; }                        // navy fleck
+        else               { const v = 24 + Math.random() * 16; cr = cg = cb = v; }
+        d[i] = cr; d[i+1] = cg; d[i+2] = cb; d[i+3] = 255;
+    }
+    x.putImageData(id, 0, 0);
+}
+
+function rebuild() {
+    const cssW = stage.clientWidth || 720;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = Math.max(2, Math.round(cssW * dpr));
+    H = Math.round(CSS_H * dpr);
+    cvs.width = W; cvs.height = H;
+    bandH = Math.max(2, Math.round(BAND_CSS * dpr));
+    nBands = Math.ceil(H / bandH);
+    tear = new Float32Array(nBands);
+    corrupt = new Uint8Array(nBands);
+    buildMain();
+    coralF = tintFrame(CORAL_L);
+    navyF  = tintFrame('#8fb0d8');
+    buildNoise();
+}
+
+// signal / noise strength as a function of line age (0 = just scanned, 1 = about to be rescanned)
+function envelope(age, cor) {
+    let sig, noi;
+    if (age < 0.045) { sig = 1; noi = 0; }
+    else {
+        const u = (age - 0.045) / 0.955;
+        sig = 0.03 + 0.97 * Math.pow(1 - u, 2.1);
+        noi = 0.05 + 0.55 * smooth(0.08, 0.80, u);
+    }
+    if (cor) { sig *= 0.22; noi = Math.max(noi, 0.58); }
+    return [sig, noi];
+}
+
+// ── one full render of the field at a given beam position ──
+function render(beamY, dropping, flash, firstPass) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+    const NH = noiseC.height;
+
+    for (let b = 0; b < nBands; b++) {
+        const y = b * bandH;
+        const h = Math.min(bandH, H - y);
+        const yc = y + h * 0.5;
+        const age = ((beamY - yc + H) % H) / H;
+        let sig, noi;
+        if (firstPass && yc > beamY) {
+            // never transmitted yet: nothing down there but carrier static
+            sig = 0; noi = 0.5 + Math.random() * 0.08;
+        } else {
+            const env = envelope(age, corrupt[b]);
+            sig = env[0]; noi = env[1];
+        }
+
+        let ox = tear[b];
+        if (age > 0.75) ox += (Math.random() - 0.5) * (age - 0.75) * 9 * dpr; // decrepit lines shiver
+
+        if (noi > 0.02) {
+            ctx.globalAlpha = Math.min(1, noi);
+            ctx.drawImage(noiseC, 0, (Math.random() * (NH - h)) | 0, W, h, ox * 0.5, y, W, h);
+        }
+        if (sig > 0.02) {
+            ctx.globalAlpha = Math.min(1, sig);
+            ctx.drawImage(main, 0, y, W, h, ox, y, W, h);
+        }
+        if (Math.abs(tear[b]) > 0.3) tear[b] *= 0.86; else tear[b] = 0;
+    }
+
+    // fresh zone at the beam: chromatic fringing, or corruption during dropout
+    const fh = Math.min(12 * dpr, beamY);
+    const fy = beamY - fh;
+    if (fh > 1) {
+        if (!dropping) {
+            ctx.globalAlpha = 0.32 + Math.random() * 0.18;
+            ctx.drawImage(coralF, 0, fy, W, fh, -2.5 * dpr, fy, W, fh);
+            ctx.drawImage(navyF,  0, fy, W, fh,  2.5 * dpr, fy, W, fh);
+            ctx.globalAlpha = 1;
+            ctx.drawImage(main, 0, fy, W, fh, 0, fy, W, fh);
+        } else {
+            ctx.globalAlpha = 0.75;
+            ctx.drawImage(noiseC, 0, (Math.random() * (noiseC.height - fh)) | 0, W, fh, 0, fy, W, fh);
+            ctx.globalAlpha = 0.2;
+            ctx.drawImage(main, 0, fy, W, fh, (Math.random() - 0.5) * 6 * dpr, fy, W, fh);
+        }
+    }
+
+    // the beam itself
+    const bh = 1.6 * dpr;
+    ctx.globalAlpha = (dropping ? 0.30 : 0.88) + Math.random() * 0.12;
+    ctx.fillStyle = '#ffffff';
+    if (dropping) {
+        // beam breaks into stuttering segments while signal is lost
+        let sx = 0;
+        while (sx < W) {
+            const seg = W * (0.05 + Math.random() * 0.14);
+            if (Math.random() > 0.4) ctx.fillRect(sx, beamY, seg, bh);
+            sx += seg + W * 0.03 * Math.random();
+        }
+    } else {
+        ctx.fillRect(0, beamY, W, bh);
+    }
+    ctx.globalAlpha = 0.32;
+    ctx.fillStyle = CORAL;
+    ctx.fillRect(0, beamY + bh, W, bh * 1.5);
+    ctx.fillRect(0, beamY - bh * 1.2, W, bh * 0.8);
+
+    if (flash > 0) {  // vertical retrace blink
+        ctx.globalAlpha = 0.045 * flash;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+    }
+    ctx.globalAlpha = 1;
+}
+
+// ── animation state ──
+let t0 = 0, lastY = 0, pass = 1, flash = 0;
+let dropUntil = -1, nextDrop = 0, nextTear = 0;
+let lastTelem = 0;
+
+function pad4(n) { return ('0000' + n).slice(-4); }
+
+function loop(now) {
+    if (!t0) { t0 = now; nextDrop = now + 5200; nextTear = now + 1600; }
+    const beamY = (((now - t0) / 1000 / PERIOD) % 1) * H;
+    if (beamY < lastY) { pass++; flash = 3; }
+    lastY = beamY;
+
+    const dropping = now < dropUntil;
+    if (!dropping && now >= nextDrop) {
+        dropUntil = now + 380 + Math.random() * 380;
+        nextDrop = dropUntil + 6500 + Math.random() * 6500;
+    }
+    if (now >= nextTear) {
+        const start = (Math.random() * nBands) | 0;
+        const len = 4 + (Math.random() * 11) | 0;
+        const amp = (3 + Math.random() * 14) * dpr * (Math.random() < 0.5 ? -1 : 1);
+        for (let b = start; b < Math.min(nBands, start + len); b++) {
+            tear[b] = amp * (0.6 + Math.random() * 0.7);
+        }
+        nextTear = now + 1000 + Math.random() * 2400;
+    }
+
+    // beam writes truth — or, during dropout, writes garbage it must fix next pass
+    const bi = Math.min(nBands - 1, (beamY / bandH) | 0);
+    corrupt[bi] = dropping ? 1 : 0;
+    if (bi > 0) corrupt[bi - 1] = dropping ? 1 : 0;
+
+    render(beamY, dropping, flash, pass === 1);
+    if (flash > 0) flash--;
+
+    if (now - lastTelem > 150) {
+        lastTelem = now;
+        tPass.textContent = pad4(pass);
+        tLine.textContent = ('000' + Math.floor(beamY / dpr)).slice(-3) + '/' + CSS_H;
+        const car = dropping ? (-67 - Math.random() * 9) : (-41.2 - Math.random() * 2.6);
+        tCar.textContent = '−' + Math.abs(car).toFixed(1) + ' dBm';
+        tStat.textContent = dropping ? 'REACQ' : 'LOCK';
+        tStat.classList.toggle('reacq', dropping);
+    }
+    requestAnimationFrame(loop);
+}
+
+function renderStatic() {
+    // one honest frame: beam two-thirds down, top already going to static
+    const beamY = H * 0.66;
+    for (let i = 0; i < 3; i++) { // a couple of frozen tears for texture
+        const start = (i * 0.27 + 0.1) * nBands | 0;
+        for (let b = start; b < start + 6 && b < nBands; b++) tear[b] = (i % 2 ? -1 : 1) * 7 * dpr;
+    }
+    render(beamY, false, 0, false);
+    tPass.textContent = '0001';
+    tLine.textContent = Math.floor(beamY / dpr) + '/' + CSS_H;
+    tCar.textContent = '−41.8 dBm';
+    tStat.textContent = 'HOLD';
+}
+
+// ── boot ──
+document.fonts.ready.then(function () {
+    rebuild();
+    if (reduced) renderStatic();
+    else requestAnimationFrame(loop);
+});
+
+let rzTimer = null;
+window.addEventListener('resize', function () {
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(function () {
+        if (!main) return;
+        rebuild();
+        if (reduced) renderStatic();
+    }, 80);
+});
+})();
+</script>
+</body>
+</html>

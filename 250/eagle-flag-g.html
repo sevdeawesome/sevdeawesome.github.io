@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the text is the bird</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Rubik',sans-serif; font-weight:400;
+  background:#1a1a1a; color:#fff;
+  padding:16px 20px 14px; overflow:hidden;
+}
+.fig { width:100%; }
+canvas { display:block; width:100%; }
+.telemetry {
+  font-size:0.63rem; letter-spacing:0.08em; color:rgba(255,255,255,0.35);
+  margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-variant-numeric:tabular-nums;
+}
+.telemetry .hot { color:#ff6b6b; }
+.fig-source {
+  font-size:0.63rem; color:rgba(255,255,255,0.22); margin-top:4px;
+  letter-spacing:0.02em;
+}
+</style>
+</head>
+<body>
+<div class="fig">
+  <canvas id="cv"></canvas>
+  <div class="telemetry" id="tele">signal: us_1776 · acquiring text…</div>
+  <div class="fig-source">fig. — the words hold the shape only for as long as something keeps retyping them.</div>
+</div>
+<script>
+'use strict';
+const EAGLE_SRC = 'data:image/png;base64,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';
+
+// ---------- the text ----------
+const PREAMBLE =
+"We the People of the United States, in Order to form a more perfect Union, " +
+"establish Justice, insure domestic Tranquility, provide for the common defence, " +
+"promote the general Welfare, and secure the Blessings of Liberty to ourselves " +
+"and our Posterity, do ordain and establish this Constitution for the United " +
+"States of America. ";
+const DECLARATION =
+"We hold these truths to be self-evident, that all men are created equal, that " +
+"they are endowed by their Creator with certain unalienable Rights, that among " +
+"these are Life, Liberty and the pursuit of Happiness. That to secure these " +
+"rights, Governments are instituted among Men, deriving their just powers from " +
+"the consent of the governed. ";
+const TEXT = PREAMBLE + DECLARATION;
+const BG_TEXT = (PREAMBLE + DECLARATION).repeat(6);
+const GLYPHS = '▓░█▒¤∅010110▚▞≡';
+
+// ---------- state ----------
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const tele = document.getElementById('tele');
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let W = 0, H = 0, dpr = 1, CS = 9, fontStr = '';
+let bgCanvas = null;
+let img = null, imgData = null;
+
+// per-inside-cell arrays (parallel)
+let n = 0;              // inside cell count
+let px = [], py = [];   // pixel position (css px)
+let ch = [];            // correct character
+let baseB = [];         // healthy alpha bucket 0..3
+let mB = [];            // maroon bucket 0/1
+let health = [];        // 1 healthy .. 0 dead
+let flash = [];         // repair flash 0..1
+let noiseI = [];        // index into GLYPHS
+let words = [];         // arrays of cell indices
+let corrList = [];      // possibly-stale indices of corrupted cells
+let corrCount = 0;
+
+// cursors
+let cursors = [];       // {pos: float, speed: cells/s}
+// phases: 0 skirmish, 1 surge, 2 cascade
+let phase = 0, phaseT = 0;
+let budget = 0;
+let teleAcc = 1, last = 0, started = false;
+
+const rnd = Math.random;
+
+// ---------- grid build ----------
+function build() {
+  const availW = document.body.clientWidth - 40;
+  W = Math.max(320, Math.min(availW, 1100));
+  H = Math.max(240, Math.min(window.innerHeight - 88, 380));
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  CS = W < 480 ? 8 : 9;
+  fontStr = 'bold ' + (CS - 1) + 'px "Courier New", monospace';
+
+  // eagle placement: centered, ~94% of height
+  const eh = H * 0.94;
+  const ew = eh * (img.width / img.height);
+  const ex = (W - ew) / 2, ey = (H - eh) / 2;
+
+  // reset cell arrays
+  n = 0; px = []; py = []; ch = []; baseB = []; mB = [];
+  health = []; flash = []; noiseI = []; words = [];
+  corrList = []; corrCount = 0;
+
+  const cols = Math.floor(ew / CS), rows = Math.floor(eh / CS);
+  const d = imgData.data, iw = img.width, ih = img.height;
+  let k = 0;                      // reading position in TEXT
+  let wordCells = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // multi-point sample so thin feathers survive the coarse grid
+      let hit = false;
+      for (const [ox, oy] of [[0.5,0.5],[0.25,0.35],[0.75,0.35],[0.25,0.75],[0.75,0.75]]) {
+        const sx = Math.min(iw - 1, Math.floor((c + ox) / cols * iw));
+        const sy = Math.min(ih - 1, Math.floor((r + oy) / rows * ih));
+        if (d[(sy * iw + sx) * 4 + 3] > 128) { hit = true; break; }
+      }
+      if (hit) {
+        const t = TEXT[k % TEXT.length]; k++;
+        px.push(ex + c * CS); py.push(ey + r * CS);
+        ch.push(t);
+        baseB.push((rnd() * 4) | 0);
+        mB.push(rnd() < 0.5 ? 0 : 1);
+        health.push(1); flash.push(0);
+        noiseI.push((rnd() * GLYPHS.length) | 0);
+        if (t === ' ') { if (wordCells.length > 1) words.push(wordCells); wordCells = []; }
+        else wordCells.push(n);
+        n++;
+      }
+    }
+  }
+  if (wordCells.length > 1) words.push(wordCells);
+
+  buildBg(ex, ey, ew, eh);
+  cursors = [ {pos: 0, speed: 90}, {pos: n / 2, speed: 90} ];
+  phase = 0; phaseT = 0; budget = 0;
+}
+
+// ---------- background flag (drawn once) ----------
+function buildBg(ex, ey, ew, eh) {
+  bgCanvas = document.createElement('canvas');
+  bgCanvas.width = Math.round(W * dpr); bgCanvas.height = Math.round(H * dpr);
+  const b = bgCanvas.getContext('2d');
+  b.setTransform(dpr, 0, 0, dpr, 0, 0);
+  b.font = '7px "Courier New", monospace';
+  b.textBaseline = 'top';
+  const stripeH = H / 13;
+  const cantonW = W * 0.30, cantonH = stripeH * 7;
+  const charW = b.measureText('M').width || 4.2;
+  let off = 0;
+  for (let y = 2; y < H - 6; y += 9) {
+    const s = Math.min(12, Math.floor(y / stripeH));
+    b.fillStyle = (s % 2 === 0) ? 'rgba(139,38,53,0.30)' : 'rgba(255,255,255,0.085)';
+    const x0 = (y < cantonH) ? cantonW + 6 : 0;
+    const count = Math.ceil((W - x0) / charW) + 1;
+    b.fillText(BG_TEXT.substr(off % 900, count), x0, y);
+    off += count + 7;
+  }
+  // canton
+  b.fillStyle = 'rgba(36,52,77,0.5)';
+  b.fillRect(0, 0, cantonW, cantonH);
+  b.font = '9px "Courier New", monospace';
+  b.fillStyle = 'rgba(105,130,168,0.72)';
+  const gx = cantonW / 7.5, gy = cantonH / 8.5;
+  for (let r = 0; r < 8; r++)
+    for (let c = 0; c < (r % 2 ? 6 : 7); c++)
+      b.fillText('★', gx * (c + 0.5) + (r % 2 ? gx * 0.5 : 0) - 4, gy * (r + 0.45));
+  // punch a soft hole where the eagle sits so its text reads on near-black
+  b.globalCompositeOperation = 'destination-out';
+  b.globalAlpha = 0.9;
+  b.drawImage(img, ex - 6, ey - 6, ew + 12, eh + 12);
+  b.globalCompositeOperation = 'source-over';
+  // faint solid underlay so the silhouette reads even between words
+  b.globalAlpha = 0.07;
+  b.drawImage(img, ex, ey, ew, eh);
+  b.globalAlpha = 1;
+}
+
+// ---------- corruption ----------
+function corrupt(i) {
+  if (health[i] >= 0.6) { corrCount++; corrList.push(i); }
+  health[i] = rnd() < 0.45 ? 0.15 : 0.45;
+  noiseI[i] = (rnd() * GLYPHS.length) | 0;
+  flash[i] = 0;
+}
+function repair(i, strong) {
+  if (health[i] < 0.6) corrCount--;
+  health[i] = 1;
+  flash[i] = strong ? 1 : 0.45;
+}
+function pickCorrupted() {
+  while (corrList.length) {
+    const j = (rnd() * corrList.length) | 0;
+    const i = corrList[j];
+    if (health[i] < 0.6) return i;
+    corrList[j] = corrList[corrList.length - 1]; corrList.pop();
+  }
+  return -1;
+}
+function infectOne() {
+  const src = (corrCount > 0 && rnd() < 0.88) ? pickCorrupted() : -1;
+  if (src >= 0) {
+    // neighbor in reading order ≈ left/right; jump a row via ±cols estimate
+    const rowJump = Math.round((W * 0.4) / CS * 0.45); // rough cells per row
+    const deltas = [1, -1, rowJump, -rowJump, rowJump + 1, -rowJump - 1];
+    const t = src + deltas[(rnd() * deltas.length) | 0];
+    if (t >= 0 && t < n && health[t] >= 0.6) corrupt(t);
+  } else {
+    corrupt((rnd() * n) | 0);
+  }
+}
+
+function simulate(dt) {
+  phaseT += dt;
+  const frac = corrCount / n;
+  let rate, cSpeed;
+  if (phase === 0) {            // skirmish
+    rate = 34; cSpeed = 90;
+    if (phaseT > 9 + rnd() * 3) { phase = 1; phaseT = 0; }
+  } else if (phase === 1) {     // surge — corruption nearly wins
+    rate = 150; cSpeed = 22;
+    if (frac >= 0.6 || phaseT > 7) {
+      phase = 2; phaseT = 0;
+      while (cursors.length < 5)
+        cursors.push({pos: rnd() * n, speed: 0});
+    }
+  } else {                      // cascade — the re-type sweep
+    rate = 0; cSpeed = 430;
+    if (frac < 0.05 && phaseT > 1.2) {
+      phase = 0; phaseT = 0;
+      cursors.length = 2;
+    }
+  }
+  budget += rate * dt;
+  while (budget >= 1) { budget--; infectOne(); }
+
+  for (const cur of cursors) {
+    cur.speed += (cSpeed - cur.speed) * Math.min(1, dt * 4);
+    const from = Math.floor(cur.pos);
+    cur.pos += cur.speed * dt;
+    const to = Math.floor(cur.pos);
+    for (let s = from; s < to; s++) {
+      const i = ((s % n) + n) % n;
+      repair(i, health[i] < 0.6);
+    }
+    if (cur.pos >= n) cur.pos -= n;
+  }
+
+  // decay: coral cells rot toward maroon; flashes cool
+  for (let i = 0; i < n; i++) {
+    if (health[i] < 0.6 && health[i] > 0.15) health[i] -= 0.22 * dt;
+    if (flash[i] > 0) flash[i] -= 2.6 * dt;
+  }
+  // static flicker in corrupted zones
+  const fl = Math.min(36, corrList.length);
+  for (let f = 0; f < fl; f++) {
+    const i = corrList[(rnd() * corrList.length) | 0];
+    if (health[i] < 0.6 && rnd() < 0.5) noiseI[i] = (rnd() * GLYPHS.length) | 0;
+  }
+}
+
+// ---------- render ----------
+const BUCKETS = [
+  'rgba(255,255,255,0.52)',  // 0 healthy dim
+  'rgba(255,255,255,0.67)',  // 1
+  'rgba(255,255,255,0.82)',  // 2
+  'rgba(255,255,255,0.95)',  // 3 healthy bright
+  'rgba(255,107,107,0.85)',  // 4 coral, freshly hit
+  'rgba(139,38,53,0.92)',    // 5 maroon
+  'rgba(92,26,36,0.95)',     // 6 dark maroon
+  'rgba(255,255,255,1)',     // 7 white-hot retype
+  'rgba(255,255,255,0.8)'    // 8 warm retype trail
+];
+const bins = BUCKETS.map(() => []);
+
+function draw() {
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(0, 0, W, H);
+  ctx.drawImage(bgCanvas, 0, 0, W, H);
+  ctx.font = fontStr;
+  ctx.textBaseline = 'top';
+
+  for (const bn of bins) bn.length = 0;
+  for (let i = 0; i < n; i++) {
+    let b;
+    if (flash[i] > 0.55) b = 7;
+    else if (flash[i] > 0.2) b = 8;
+    else if (health[i] >= 0.6) { if (ch[i] === ' ') continue; b = baseB[i]; }
+    else b = (health[i] >= 0.3) ? 4 : 5 + mB[i];
+    bins[b].push(i);
+  }
+  for (let b = 0; b < bins.length; b++) {
+    const list = bins[b];
+    if (!list.length) continue;
+    ctx.fillStyle = BUCKETS[b];
+    const corruptB = (b >= 4 && b <= 6);
+    for (let j = 0; j < list.length; j++) {
+      const i = list[j];
+      const g = corruptB ? GLYPHS[noiseI[i]] : ch[i];
+      if (g === ' ') continue;
+      ctx.fillText(g, px[i], py[i]);
+    }
+  }
+  // cursors: the typewriter head
+  for (const cur of cursors) {
+    const i = ((Math.floor(cur.pos) % n) + n) % n;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(px[i] - 1, py[i] - 1, CS - 1, CS);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillText(ch[i] === ' ' ? '_' : ch[i], px[i], py[i]);
+  }
+}
+
+// ---------- telemetry ----------
+function updateTele() {
+  const pct = Math.round(100 * corrCount / n);
+  let intact = 0;
+  for (const w of words) {
+    let ok = true;
+    for (const i of w) if (health[i] < 0.6) { ok = false; break; }
+    if (ok) intact++;
+  }
+  const mode = phase === 0 ? 'holding' : phase === 1 ? '<span class="hot">corruption spreading</span>' : 'retyping';
+  tele.innerHTML = 'signal: us_1776 · corruption: <span class="hot">' + pct +
+    '%</span> · ' + mode + ' · words intact: ' + intact + '/' + words.length;
+}
+
+// ---------- loop ----------
+function frame(t) {
+  if (!last) last = t;
+  const dt = Math.min(0.05, (t - last) / 1000);
+  last = t;
+  simulate(dt);
+  draw();
+  teleAcc += dt;
+  if (teleAcc > 0.25) { teleAcc = 0; updateTele(); }
+  requestAnimationFrame(frame);
+}
+
+function staticFrame() {
+  // one good frame: mostly-healthy eagle, a few corruption patches
+  for (let s = 0; s < 4; s++) {
+    let i = (rnd() * n) | 0;
+    for (let m = 0; m < n * 0.02; m++) {
+      corrupt(i);
+      i = Math.max(0, Math.min(n - 1, i + [1, -1, 30, -30][(rnd() * 4) | 0]));
+    }
+  }
+  cursors = [];
+  draw();
+  updateTele();
+}
+
+let rsT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(rsT);
+  rsT = setTimeout(() => { if (started) { build(); if (REDUCED) staticFrame(); } }, 80);
+});
+
+const imgReady = new Promise(res => {
+  img = new Image();
+  img.onload = () => {
+    const oc = document.createElement('canvas');
+    oc.width = img.width; oc.height = img.height;
+    const octx = oc.getContext('2d');
+    octx.drawImage(img, 0, 0);
+    imgData = octx.getImageData(0, 0, img.width, img.height);
+    res();
+  };
+  img.src = EAGLE_SRC;
+});
+
+Promise.all([document.fonts.ready, imgReady]).then(() => {
+  started = true;
+  build();
+  if (REDUCED) staticFrame();
+  else requestAnimationFrame(frame);
+});
+</script>
+</body>
+</html>

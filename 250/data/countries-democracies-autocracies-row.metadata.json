@@ -1,0 +1,76 @@
+{
+  "chart": {
+    "title": "Countries that are democracies and autocracies",
+    "subtitle": "Classification by Lührmann et al. (2018) based on expert estimates by V-Dem.",
+    "note": "The share of closed autocracies increases a lot in 1900 because V-Dem covers many more countries since then, often colonies.",
+    "citation": "V-Dem (2026)",
+    "originalChartUrl": "https://ourworldindata.org/grapher/countries-democracies-autocracies-row?v=1&csvType=filtered&useColumnShortNames=false",
+    "selection": [
+      "World"
+    ]
+  },
+  "columns": {
+    "Number of closed autocracies": {
+      "titleShort": "Closed autocracies",
+      "titleLong": "Closed autocracies",
+      "descriptionProcessing": "### Data imputation\nWe expand the years covered by V-Dem further: To expand the time coverage of today's countries and include more of the period when they were still non-sovereign territories, we identified the historical entity they were a part of and used that regime's data whenever available\n\nFor example, V-Dem only provides regime data since Bangladesh's independence in 1971. There is, however, regime data for Pakistan and the colony of India, both of which the current territory of Bangladesh was a part. We, therefore, use the regime data of Pakistan for Bangladesh from 1947 to 1970, and the regime data of India from 1789 to 1946. We did so for all countries with a past or current population of more than one million.\n\nFor more details on the imputation methodology and which countries are affected, refer to [this file](https://github.com/owid/etl/blob/master/etl/steps/data/garden/democracy/2025-03-17/vdem/vdem.countries_impute.yml).",
+      "unit": "countries",
+      "timespan": "1789-2025",
+      "type": "Integer",
+      "owidVariableId": 1209940,
+      "shortName": "num_countries_regime__category_closed_autocracy",
+      "lastUpdated": "2026-03-17",
+      "nextUpdate": "2027-03-17",
+      "citationShort": "V-Dem (2026) – processed by Our World in Data",
+      "citationLong": "V-Dem (2026) – processed by Our World in Data. “Closed autocracies” [dataset]. V-Dem, “Democracy report v16” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1209940.metadata.json"
+    },
+    "Number of electoral autocracies": {
+      "titleShort": "Electoral autocracies",
+      "titleLong": "Electoral autocracies",
+      "descriptionProcessing": "### Data imputation\nWe expand the years covered by V-Dem further: To expand the time coverage of today's countries and include more of the period when they were still non-sovereign territories, we identified the historical entity they were a part of and used that regime's data whenever available\n\nFor example, V-Dem only provides regime data since Bangladesh's independence in 1971. There is, however, regime data for Pakistan and the colony of India, both of which the current territory of Bangladesh was a part. We, therefore, use the regime data of Pakistan for Bangladesh from 1947 to 1970, and the regime data of India from 1789 to 1946. We did so for all countries with a past or current population of more than one million.\n\nFor more details on the imputation methodology and which countries are affected, refer to [this file](https://github.com/owid/etl/blob/master/etl/steps/data/garden/democracy/2025-03-17/vdem/vdem.countries_impute.yml).",
+      "unit": "countries",
+      "timespan": "1789-2025",
+      "type": "Integer",
+      "owidVariableId": 1209938,
+      "shortName": "num_countries_regime__category_electoral_autocracy",
+      "lastUpdated": "2026-03-17",
+      "nextUpdate": "2027-03-17",
+      "citationShort": "V-Dem (2026) – processed by Our World in Data",
+      "citationLong": "V-Dem (2026) – processed by Our World in Data. “Electoral autocracies” [dataset]. V-Dem, “Democracy report v16” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1209938.metadata.json"
+    },
+    "Number of electoral democracies": {
+      "titleShort": "Electoral democracies",
+      "titleLong": "Electoral democracies",
+      "descriptionProcessing": "### Data imputation\nWe expand the years covered by V-Dem further: To expand the time coverage of today's countries and include more of the period when they were still non-sovereign territories, we identified the historical entity they were a part of and used that regime's data whenever available\n\nFor example, V-Dem only provides regime data since Bangladesh's independence in 1971. There is, however, regime data for Pakistan and the colony of India, both of which the current territory of Bangladesh was a part. We, therefore, use the regime data of Pakistan for Bangladesh from 1947 to 1970, and the regime data of India from 1789 to 1946. We did so for all countries with a past or current population of more than one million.\n\nFor more details on the imputation methodology and which countries are affected, refer to [this file](https://github.com/owid/etl/blob/master/etl/steps/data/garden/democracy/2025-03-17/vdem/vdem.countries_impute.yml).",
+      "unit": "countries",
+      "timespan": "1789-2025",
+      "type": "Integer",
+      "owidVariableId": 1209941,
+      "shortName": "num_countries_regime__category_electoral_democracy",
+      "lastUpdated": "2026-03-17",
+      "nextUpdate": "2027-03-17",
+      "citationShort": "V-Dem (2026) – processed by Our World in Data",
+      "citationLong": "V-Dem (2026) – processed by Our World in Data. “Electoral democracies” [dataset]. V-Dem, “Democracy report v16” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1209941.metadata.json"
+    },
+    "Number of liberal democracies": {
+      "titleShort": "Liberal democracies",
+      "titleLong": "Liberal democracies",
+      "descriptionProcessing": "### Data imputation\nWe expand the years covered by V-Dem further: To expand the time coverage of today's countries and include more of the period when they were still non-sovereign territories, we identified the historical entity they were a part of and used that regime's data whenever available\n\nFor example, V-Dem only provides regime data since Bangladesh's independence in 1971. There is, however, regime data for Pakistan and the colony of India, both of which the current territory of Bangladesh was a part. We, therefore, use the regime data of Pakistan for Bangladesh from 1947 to 1970, and the regime data of India from 1789 to 1946. We did so for all countries with a past or current population of more than one million.\n\nFor more details on the imputation methodology and which countries are affected, refer to [this file](https://github.com/owid/etl/blob/master/etl/steps/data/garden/democracy/2025-03-17/vdem/vdem.countries_impute.yml).",
+      "unit": "countries",
+      "timespan": "1789-2025",
+      "type": "Integer",
+      "owidVariableId": 1209942,
+      "shortName": "num_countries_regime__category_liberal_democracy",
+      "lastUpdated": "2026-03-17",
+      "nextUpdate": "2027-03-17",
+      "citationShort": "V-Dem (2026) – processed by Our World in Data",
+      "citationLong": "V-Dem (2026) – processed by Our World in Data. “Liberal democracies” [dataset]. V-Dem, “Democracy report v16” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1209942.metadata.json"
+    }
+  },
+  "dateDownloaded": "2026-07-02",
+  "activeFilters": {}
+}

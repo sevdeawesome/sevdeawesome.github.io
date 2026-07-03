@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Long Course — Ascent Figure C</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 20px 14px;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #fig-wrap { width: 100%; max-width: 700px; margin: 0 auto; }
+
+        #ascent-canvas { display: block; width: 100%; }
+
+        .fig-source {
+            font-size: 0.63rem;
+            color: rgba(255,255,255,0.22);
+            margin-top: 9px;
+            letter-spacing: 0.2px;
+        }
+    </style>
+</head>
+<body>
+<div id="fig-wrap">
+    <canvas id="ascent-canvas" role="img"
+        aria-label="A small American flag at lower left whose thirteen stripes extend and fan open into a widening cone of stars — the light cone of possible futures. A single thin gold line climbs slowly through the cone, leaving small markers at each increment, and ends as a bright gold star among the others."></canvas>
+    <div class="fig-source">
+        vessel: us_1776 &nbsp;·&nbsp; heading: incrementally wiser, more capable, more empathetic &nbsp;·&nbsp; course corrected en route &nbsp;·&nbsp; still underway
+    </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+// ─── SETUP ────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('ascent-canvas');
+const ctx = canvas.getContext('2d');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// palette (style.md only)
+const GOLD   = '255,215,0';    // #ffd700 — the rare transcendent highlight
+const CORAL  = '255,107,107';  // #ff6b6b — sparingly: the "you are here" pulse
+const WHITE  = '255,255,255';
+const MAROON = '139,38,53';    // muted deep red for stripes
+const NAVY   = '#242d42';      // muted navy canton
+
+let W, H, dpr;
+let animId = null;
+let startT = null;
+
+// deterministic pseudo-random, stable across resizes
+function seeded(i) {
+    const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+}
+function smoothstep(a, b, x) {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+}
+
+// ─── GEOMETRY (recomputed on resize, all in device px) ───────────────────────
+let flag = {};        // flag rect
+let origin = {};      // cone apex: middle of the flag's fly edge
+let fanLines = [];    // 13 stripe-continuation lines
+let stars = [];       // ambient starfield
+let goldPts = [];     // sampled gold trajectory, arc-length parameterized
+const WAYPOINTS = [0.16, 0.34, 0.52, 0.70, 0.88]; // the increments
+
+const STRIPES = 13;
+const FAN_TOP = -58 * Math.PI / 180;   // steepest stripe heading (up-right)
+const FAN_BOT =  -3 * Math.PI / 180;   // shallowest, near horizontal
+
+function resize() {
+    dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.parentElement.clientWidth;
+    const cssH = cssW < 500
+        ? Math.round(cssW * 0.92)
+        : Math.min(Math.round(cssW * 0.58), 400);
+    W = cssW * dpr;
+    H = cssH * dpr;
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = cssH + 'px';
+    layout();
+}
+
+function layout() {
+    // small, quiet flag at lower left
+    const fw = Math.max(W * 0.165, 70 * dpr);
+    const fh = fw * 0.55;
+    flag = { x: W * 0.055, y: H * 0.62, w: fw, h: fh };
+    origin = { x: flag.x + flag.w, y: flag.y + flag.h * 0.5 };
+
+    // ── the 13 stripes fan open into the light cone ──
+    fanLines = [];
+    const R = Math.hypot(W, H) * 1.1;
+    for (let i = 0; i < STRIPES; i++) {
+        const sy = flag.y + (i + 0.5) * (flag.h / STRIPES);
+        const th = FAN_TOP + (FAN_BOT - FAN_TOP) * (i / (STRIPES - 1));
+        const ex = origin.x + Math.cos(th) * R;
+        const ey = origin.y + Math.sin(th) * R;
+        // control point pulled low & right: shallow at first, then climbing
+        const cx = origin.x + (ex - origin.x) * 0.52;
+        const cy = sy + (ey - sy) * 0.30;
+        fanLines.push({
+            sx: origin.x, sy, cx, cy, ex, ey,
+            red: i % 2 === 0
+        });
+    }
+
+    // ── starfield: dense inside the cone, sparse outside ──
+    stars = [];
+    const Rmax = Math.hypot(W - origin.x, origin.y) * 1.05;
+    let s = 0, made = 0, guard = 0;
+    while (made < 170 && guard < 3000) {
+        guard++;
+        const r1 = seeded(s++), r2 = seeded(s++), r3 = seeded(s++),
+              r4 = seeded(s++), r5 = seeded(s++);
+        let x, y, inCone;
+        if (r1 < 0.74) {
+            // inside the cone: farther out = denser, brighter — the sky opening
+            const th = FAN_TOP + (FAN_BOT - FAN_TOP) * r2;
+            const rr = Rmax * (0.16 + 0.84 * Math.sqrt(r3));
+            x = origin.x + Math.cos(th) * rr;
+            y = origin.y + Math.sin(th) * rr;
+            inCone = true;
+        } else {
+            x = r2 * W;
+            y = r3 * H;
+            inCone = false;
+        }
+        if (x < 0 || x > W || y < 0 || y > H) continue;
+        // keep the flag itself clear
+        if (x > flag.x - 8 * dpr && x < flag.x + flag.w + 6 * dpr &&
+            y > flag.y - 8 * dpr && y < flag.y + flag.h + 8 * dpr) continue;
+
+        const dist = Math.hypot(x - origin.x, y - origin.y) / Rmax;
+        const base = inCone
+            ? 0.14 + 0.55 * dist * (0.4 + 0.6 * r4)
+            : 0.04 + 0.10 * r4;
+        // a handful of far gold stars: the destinations
+        const gold = inCone && dist > 0.62 && r5 > 0.93;
+        stars.push({
+            x, y,
+            r: (0.5 + r4 * 1.1) * dpr * (gold ? 1.35 : 1),
+            base: gold ? Math.max(base, 0.5) : base,
+            gold,
+            sp: 0.25 + r5 * 0.6,       // slow twinkle
+            ph: r2 * Math.PI * 2
+        });
+        made++;
+    }
+
+    // ── the gold trajectory: one course, actually steered ──
+    const gsx = origin.x, gsy = flag.y + flag.h * 0.30;
+    const gex = W * 0.925, gey = H * 0.085;
+    const gcx = gsx + (gex - gsx) * 0.60;
+    const gcy = gsy - (gsy - gey) * 0.10;   // hugs low, then climbs
+    const raw = [];
+    const N = 200;
+    for (let i = 0; i <= N; i++) {
+        const t = i / N, u = 1 - t;
+        raw.push({
+            x: u * u * gsx + 2 * u * t * gcx + t * t * gex,
+            y: u * u * gsy + 2 * u * t * gcy + t * t * gey
+        });
+    }
+    // arc-length parameterize for constant travel speed
+    let total = 0;
+    const cum = [0];
+    for (let i = 1; i <= N; i++) {
+        total += Math.hypot(raw[i].x - raw[i-1].x, raw[i].y - raw[i-1].y);
+        cum.push(total);
+    }
+    goldPts = [];
+    for (let i = 0; i <= N; i++) {
+        let target = (i / N) * total, j = 1;
+        while (j < N && cum[j] < target) j++;
+        const seg = cum[j] - cum[j-1] || 1;
+        const f = (target - cum[j-1]) / seg;
+        goldPts.push({
+            x: raw[j-1].x + (raw[j].x - raw[j-1].x) * f,
+            y: raw[j-1].y + (raw[j].y - raw[j-1].y) * f
+        });
+    }
+}
+
+function pointAt(p) {
+    const idx = p * (goldPts.length - 1);
+    const i = Math.min(goldPts.length - 2, Math.floor(idx));
+    const f = idx - i;
+    return {
+        x: goldPts[i].x + (goldPts[i+1].x - goldPts[i].x) * f,
+        y: goldPts[i].y + (goldPts[i+1].y - goldPts[i].y) * f
+    };
+}
+
+// ─── DRAWING ──────────────────────────────────────────────────────────────────
+
+function drawStars(t) {
+    for (const st of stars) {
+        const tw = reducedMotion ? 1 : (0.72 + 0.28 * Math.sin(t * st.sp + st.ph));
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${st.gold ? GOLD : WHITE},${(st.base * tw).toFixed(3)})`;
+        ctx.fill();
+    }
+}
+
+function drawFan() {
+    for (const ln of fanLines) {
+        const grad = ctx.createLinearGradient(ln.sx, ln.sy, ln.ex, ln.ey);
+        const a0 = ln.red ? 0.30 : 0.11;
+        const col = ln.red ? MAROON : WHITE;
+        grad.addColorStop(0,    `rgba(${col},${a0})`);
+        grad.addColorStop(0.45, `rgba(${col},${(a0 * 0.38).toFixed(3)})`);
+        grad.addColorStop(1,    `rgba(${col},0)`);
+        ctx.beginPath();
+        ctx.moveTo(ln.sx, ln.sy);
+        ctx.quadraticCurveTo(ln.cx, ln.cy, ln.ex, ln.ey);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = (ln.red ? 1.0 : 0.8) * dpr;
+        ctx.stroke();
+    }
+}
+
+function drawFlag() {
+    const { x, y, w, h } = flag;
+    const sh = h / STRIPES;
+    for (let i = 0; i < STRIPES; i++) {
+        ctx.fillStyle = i % 2 === 0
+            ? `rgba(${MAROON},0.88)`
+            : `rgba(${WHITE},0.13)`;
+        ctx.fillRect(x, y + i * sh, w, sh + 0.5);
+    }
+    // canton
+    const cw = w * 0.42, ch = sh * 7;
+    ctx.fillStyle = NAVY;
+    ctx.fillRect(x, y, cw, ch);
+    // canton stars: quiet staggered grid
+    const rows = 4, cols = 5;
+    const px = cw * 0.14, py = ch * 0.16;
+    for (let r = 0; r < rows; r++) {
+        const n = r % 2 === 0 ? cols : cols - 1;
+        for (let c = 0; c < n; c++) {
+            const sx = x + px + ((cw - 2 * px) / (n - 1)) * c;
+            const sy = y + py + ((ch - 2 * py) / (rows - 1)) * r;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 0.85 * dpr, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${WHITE},0.78)`;
+            ctx.fill();
+        }
+    }
+}
+
+// timeline: draw 34s → hold 9s → fade 3.5s → repeat
+const T_DRAW = 34, T_HOLD = 9, T_FADE = 3.5;
+const T_CYCLE = T_DRAW + T_HOLD + T_FADE;
+
+function threadState(t) {
+    if (reducedMotion) return { p: 1, alpha: 1, holdT: 2.2 };
+    const tc = t % T_CYCLE;
+    if (tc < T_DRAW)         return { p: smoothstep(0, 1, tc / T_DRAW), alpha: 1, holdT: 0 };
+    if (tc < T_DRAW + T_HOLD) return { p: 1, alpha: 1, holdT: tc - T_DRAW };
+    const f = (tc - T_DRAW - T_HOLD) / T_FADE;
+    return { p: 1, alpha: 1 - smoothstep(0, 1, f), holdT: T_HOLD };
+}
+
+function drawThread(t) {
+    const { p, alpha, holdT } = threadState(t);
+    if (alpha <= 0.005 || p <= 0.002) return;
+
+    // the line so far
+    const last = Math.max(2, Math.round(p * (goldPts.length - 1)));
+    ctx.beginPath();
+    ctx.moveTo(goldPts[0].x, goldPts[0].y);
+    for (let i = 1; i <= last; i++) ctx.lineTo(goldPts[i].x, goldPts[i].y);
+    ctx.strokeStyle = `rgba(${GOLD},${(0.52 * alpha).toFixed(3)})`;
+    ctx.lineWidth = 1.05 * dpr;
+    ctx.stroke();
+
+    // increment markers, left behind as the course is held
+    for (const wp of WAYPOINTS) {
+        const a = smoothstep(wp, wp + 0.03, p) * alpha;
+        if (a <= 0.01) continue;
+        const pt = pointAt(wp);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 1.5 * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${GOLD},${(0.65 * a).toFixed(3)})`;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 3.6 * dpr, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${GOLD},${(0.16 * a).toFixed(3)})`;
+        ctx.lineWidth = 0.7 * dpr;
+        ctx.stroke();
+    }
+
+    // the head: a vessel while underway, a star on arrival
+    const head = pointAt(p);
+    const arrived = p >= 0.999;
+    const pulse = arrived
+        ? 1 + 0.22 * Math.sin(holdT * 1.6)
+        : 1;
+    const r = (arrived ? 2.6 : 1.9) * dpr * pulse;
+
+    const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, r * (arrived ? 6 : 4));
+    glow.addColorStop(0, `rgba(${GOLD},${(0.5 * alpha).toFixed(3)})`);
+    glow.addColorStop(1, `rgba(${GOLD},0)`);
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, r * (arrived ? 6 : 4), 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${GOLD},${(0.92 * alpha).toFixed(3)})`;
+    ctx.fill();
+
+    // on arrival: four quiet diffraction spikes — it has become a star
+    if (arrived) {
+        const sp = r * 3.4;
+        ctx.strokeStyle = `rgba(${GOLD},${(0.35 * alpha).toFixed(3)})`;
+        ctx.lineWidth = 0.7 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(head.x - sp, head.y); ctx.lineTo(head.x + sp, head.y);
+        ctx.moveTo(head.x, head.y - sp); ctx.lineTo(head.x, head.y + sp);
+        ctx.stroke();
+    }
+}
+
+function drawOriginPulse(t) {
+    // "you are here" — the single coral note, at the point of departure
+    const p = reducedMotion ? 0.5 : (0.5 + 0.5 * Math.sin(t * 0.85));
+    const x = origin.x, y = flag.y + flag.h * 0.30;
+    ctx.beginPath();
+    ctx.arc(x, y, (1.4 + 0.5 * p) * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${CORAL},${(0.30 + 0.22 * p).toFixed(3)})`;
+    ctx.fill();
+}
+
+// ─── LOOP ─────────────────────────────────────────────────────────────────────
+function render(t) {
+    ctx.clearRect(0, 0, W, H);
+    drawStars(t);
+    drawFan();
+    drawFlag();
+    drawThread(t);
+    drawOriginPulse(t);
+}
+
+function animate(ts) {
+    if (startT === null) startT = ts;
+    render((ts - startT) / 1000);
+    animId = requestAnimationFrame(animate);
+}
+
+function start() {
+    if (animId) cancelAnimationFrame(animId);
+    resize();
+    if (reducedMotion) {
+        // one beautiful still: course complete, star risen, sky open
+        render(0);
+        return;
+    }
+    startT = null;
+    animId = requestAnimationFrame(animate);
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(start, 80);
+});
+
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(start);
+} else {
+    start();
+}
+})();
+</script>
+</body>
+</html>

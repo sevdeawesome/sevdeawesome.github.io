@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rippling Signal — Flag Figure G</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 20px 14px;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #fig-wrap {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        /* stage is overflow-visible so drifting particles can escape past
+           the canvas's own right edge into the page margin */
+        #stage {
+            position: relative;
+            width: 100%;
+            overflow: visible;
+        }
+
+        #flag-canvas {
+            display: block;
+            width: 100%;
+        }
+
+        .fig-source {
+            font-size: 0.63rem;
+            color: rgba(255,255,255,0.22);
+            margin-top: 8px;
+            letter-spacing: 0.1px;
+        }
+        .fig-source a { color: rgba(255,255,255,0.3); text-decoration: none; }
+    </style>
+</head>
+<body>
+<div id="fig-wrap">
+    <div id="stage">
+        <canvas id="flag-canvas" role="img" aria-label="A grid-cell American flag that ripples like physical cloth while degrading from saturated dark red on the left into scattered, drifting pixels on the right, with subtle chromatic glitches at the crests of the wave."></canvas>
+    </div>
+    <div class="fig-source">signal: us_1776 &nbsp;·&nbsp; integrity degrading &nbsp;·&nbsp; energy required to maintain</div>
+</div>
+
+<script>
+(function () {
+    // ─── PALETTE (style.md only) ───────────────────────────────────────────
+    const CORAL       = [255, 107, 107];   // #ff6b6b
+    const CORAL_LIGHT = [255, 135, 135];   // #ff8787
+    const MAROON_DEEP = [92, 26, 36];      // #5c1a24
+    const MAROON      = [139, 38, 53];     // #8b2635
+    const WHITE       = [255, 255, 255];
+    const BG          = [26, 26, 26];      // #1a1a1a
+    const CANTON_NAVY = [28, 34, 46];      // sparing muted navy for canton
+
+    // ─── CANVAS SETUP ───────────────────────────────────────────────────────
+    const canvas = document.getElementById('flag-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W, H, dpr;
+    let animId, startT = null;
+
+    // grid resolution — matches flag-figure.html's cell language:
+    // 13 stripe rows, ~40 columns across the full width.
+    const COLS = 40;
+    const ROWS = 13;
+    const CANTON_COLS = Math.round(COLS * 0.40);
+    const CANTON_ROWS = 7;
+
+    function resize() {
+        dpr = window.devicePixelRatio || 1;
+        const cssW = canvas.parentElement.clientWidth;
+        const cssH = Math.round(cssW * 0.56); // room for wave amplitude + drift margin
+
+        W = Math.round(cssW * dpr);
+        H = Math.round(cssH * dpr);
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.height = cssH + 'px';
+    }
+
+    // ─── deterministic PRNG (stable seeds so glitch/drift placement doesn't
+    //     jump around between frames or resizes) ───────────────────────────
+    function hash(i) {
+        const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+        return x - Math.floor(x);
+    }
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function lerpRGB(c1, c2, t) {
+        return [
+            Math.round(lerp(c1[0], c2[0], t)),
+            Math.round(lerp(c1[1], c2[1], t)),
+            Math.round(lerp(c1[2], c2[2], t)),
+        ];
+    }
+    function rgbStr(c, a) {
+        return a === undefined ? `rgb(${c[0]},${c[1]},${c[2]})` : `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+    }
+
+    // ─── FLAG GEOMETRY ───────────────────────────────────────────────────────
+    function flagRect() {
+        const marginX = W * 0.05;
+        const marginY = H * 0.16;
+        return {
+            x: marginX,
+            y: marginY,
+            w: W - marginX * 2,
+            h: H - marginY * 2,
+        };
+    }
+
+    // ─── WAVE FIELD (cloth motion, borrowed from flag-figure-d) ─────────────
+    // Pinned at the hoist (left), free at the fly (right) — amplitude ramps
+    // up left-to-right so the whole grid visibly billows like fabric.
+    function waveDisplacement(uFrac, vFrac, t) {
+        const amp = 0.25 + uFrac * uFrac * 0.75; // never fully flat, but grows toward the fly
+
+        const w1 = Math.sin(uFrac * 9.5 - t * 2.0 + vFrac * 1.3) * 1.0;
+        const w2 = Math.sin(uFrac * 5.0 - t * 1.35 + vFrac * 2.6) * 0.5;
+        const w3 = Math.sin(uFrac * 16.0 - t * 3.1) * 0.16;
+
+        const dy = (w1 + w2 + w3) * amp;
+        const dx = Math.sin(uFrac * 9.5 - t * 2.0 + vFrac * 1.3 + 1.2) * amp * 0.10;
+
+        return { dy, dx, curvSeed: w1 + w2 };
+    }
+
+    // ─── LEFT→RIGHT DEGRADATION (position-only, independent of the wave) ───
+    // Deep maroon intact on the left, through coral, into a frayed/scattered
+    // zone on the right — same gradient bands as flag-figure.html.
+    function degradation(colIndex) {
+        return colIndex / (COLS - 1);
+    }
+
+    // ─── deterministic per-cell state built once (colors, drop-outs, drift,
+    //     flicker phase) so the grid's identity is stable frame to frame —
+    //     only positions move with the wave. ───────────────────────────────
+    let cells = [];
+    let stars = [];
+
+    function buildCellModel() {
+        cells = [];
+        let seed = 0;
+
+        for (let row = 0; row < ROWS; row++) {
+            const stripeIsRed = row % 2 === 0;
+            const isCantonRow = row < CANTON_ROWS;
+
+            for (let col = 0; col < COLS; col++) {
+                const inCanton = isCantonRow && col < CANTON_COLS;
+                const t = degradation(col);
+                seed++;
+                const rnd = hash(seed);
+                const rnd2 = hash(seed + 1000);
+                const rnd3 = hash(seed + 2000);
+
+                let fill, opacity;
+
+                if (inCanton) {
+                    const cantonT = col / CANTON_COLS;
+                    fill = lerpRGB(CANTON_NAVY, MAROON_DEEP, cantonT * 0.3);
+                    opacity = 0.95 - cantonT * 0.06;
+                } else if (t < 0.30) {
+                    fill = lerpRGB(MAROON_DEEP, MAROON, t / 0.30);
+                    opacity = stripeIsRed ? 0.95 : 0.5;
+                } else if (t < 0.62) {
+                    const local = (t - 0.30) / 0.32;
+                    fill = lerpRGB(MAROON, CORAL, local);
+                    opacity = stripeIsRed ? (0.9 - local * 0.15) : (0.46 - local * 0.1);
+                } else if (t < 0.85) {
+                    const local = (t - 0.62) / 0.23;
+                    fill = lerpRGB(CORAL, CORAL_LIGHT, local);
+                    opacity = stripeIsRed ? (0.75 - local * 0.35) : (0.32 - local * 0.18);
+                } else {
+                    const local = (t - 0.85) / 0.15;
+                    fill = lerpRGB(CORAL_LIGHT, WHITE, local * 0.7);
+                    opacity = Math.max(0.05, (stripeIsRed ? 0.4 : 0.18) - local * 0.3);
+                }
+
+                // fray-zone drop-outs: some cells simply don't exist
+                const inFrayZone = t > 0.82 && !inCanton;
+                if (inFrayZone && rnd < 0.22) continue;
+
+                // gentle escaping drift for a subset of far-right cells
+                const drifting = t > 0.80 && !inCanton && rnd > 0.6;
+
+                cells.push({
+                    row, col, inCanton, t, fill, opacity,
+                    flickerPhase: rnd2 * Math.PI * 2,
+                    flickerSpeed: 0.5 + rnd3 * 0.6,
+                    flickerDepth: rnd2 < 0.45 ? (0.15 + rnd * 0.25) : 0,
+                    drifting,
+                    driftSeed: rnd2,
+                    driftDur: 3.5 + rnd * 3.5,
+                    driftPhase: rnd3 * 6,
+                    driftEx: (10 + rnd * 40),
+                    driftEy: (rnd2 > 0.5 ? 1 : -1) * (4 + rnd3 * 16),
+                    glitchSeedBase: seed * 53,
+                });
+            }
+        }
+
+        // ── star canton dots ──
+        stars = [];
+        const starCols = 8, starRows = 5;
+        let sseed = 5000;
+        for (let r = 0; r < starRows; r++) {
+            const cols = (r % 2 === 0) ? starCols : starCols - 1;
+            for (let c = 0; c < cols; c++) {
+                sseed++;
+                const rnd = hash(sseed);
+                const uFrac = (r % 2 === 0)
+                    ? ((c + 0.5) / starCols) * 0.40 * 0.92 + 0.40 * 0.04
+                    : ((c + 0.5) / (starCols - 1)) * 0.40 * 0.92 + 0.40 * 0.04;
+                const vFrac = ((r + 0.5) / starRows) * (CANTON_ROWS / ROWS) * 0.92 + (CANTON_ROWS / ROWS) * 0.04;
+                stars.push({
+                    uFrac, vFrac,
+                    opacity: 0.92 - (uFrac / 0.40) * 0.22 - rnd * 0.08,
+                    flickerPhase: rnd * Math.PI * 2,
+                    seed: sseed,
+                });
+            }
+        }
+    }
+
+    // ─── STRAIN → subtle chromatic-aberration glitch at wave crest/trough ──
+    // Understated echo of variant D's "strain reveals corruption" idea:
+    // only fires where local curvature is high AND we're already past the
+    // clean-left zone, and even then keeps the offset tiny.
+    function cellStrain(uFrac, vFrac, t) {
+        const eps = 0.01;
+        const a = waveDisplacement(Math.max(0, uFrac - eps), vFrac, t).dy;
+        const b = waveDisplacement(uFrac, vFrac, t).dy;
+        const c = waveDisplacement(Math.min(1, uFrac + eps), vFrac, t).dy;
+        return Math.abs((c - b) - (b - a));
+    }
+
+    // ─── DRAW ONE CELL ────────────────────────────────────────────────────
+    function drawCell(cell, rect, t) {
+        const uFrac = cell.col / (COLS - 1);
+        const vFrac = (cell.row + 0.5) / ROWS;
+
+        const { dy, dx } = waveDisplacement(uFrac, vFrac, t);
+        const ampPx = rect.h * 0.11;
+
+        const cellW = rect.w / COLS;
+        const cellH = rect.h / ROWS;
+        const baseX = rect.x + cell.col * cellW;
+        const baseY = rect.y + cell.row * cellH;
+
+        const px = baseX + dx * ampPx;
+        const py = baseY + dy * ampPx;
+
+        // gentle flicker (breathing opacity), same spirit as flag-figure.html
+        const flicker = cell.flickerDepth > 0
+            ? 1 - cell.flickerDepth * (0.5 + 0.5 * Math.sin(t * cell.flickerSpeed + cell.flickerPhase))
+            : 1;
+
+        // slow escaping drift for far-right fray cells: soft outward creep,
+        // looped, fading near the end of each cycle (no violent motion)
+        let driftX = 0, driftY = 0, driftFade = 1, driftScale = 1;
+        if (cell.drifting) {
+            const cyc = ((t + cell.driftPhase) % cell.driftDur) / cell.driftDur;
+            const ease = cyc < 0.5 ? 0 : (cyc - 0.5) / 0.5;
+            driftX = cell.driftEx * ease;
+            driftY = cell.driftEy * ease * 0.6;
+            driftFade = 1 - ease * 0.95;
+            driftScale = 1 - ease * 0.5;
+        }
+
+        const w = cellW * 0.82 * driftScale;
+        const h = cellH * 0.82 * driftScale;
+        const x = px + cellW * 0.09 + driftX;
+        const y = py + cellH * 0.09 + driftY;
+
+        const opacity = cell.opacity * flicker * driftFade;
+        if (opacity <= 0.01) return;
+
+        // strain-based subtle glitch: only past the mid-transition band,
+        // and only at genuine local curvature peaks
+        let glitching = false, glitchAmt = 0;
+        if (cell.t > 0.42 && !cell.inCanton) {
+            const curvature = cellStrain(uFrac, vFrac, t);
+            const strainNorm = Math.min(1, curvature * 3.2);
+            const flickerRnd = hash(cell.glitchSeedBase + Math.floor(t * 2.2));
+            if (strainNorm > 0.62 && flickerRnd > 0.72) {
+                glitching = true;
+                glitchAmt = strainNorm;
+            }
+        }
+
+        if (!glitching) {
+            ctx.fillStyle = rgbStr(cell.fill, opacity);
+            ctx.fillRect(x, y, w, h);
+        } else {
+            // understated chromatic aberration: two faint offset fills plus
+            // the true-color fill on top, kept subtle (small jitter, modest alpha)
+            const jitter = (0.6 + glitchAmt * 1.2) * dpr;
+            ctx.save();
+            ctx.fillStyle = rgbStr(CORAL, opacity * 0.55);
+            ctx.fillRect(x + jitter, y, w, h);
+            ctx.fillStyle = rgbStr(WHITE, opacity * 0.35);
+            ctx.fillRect(x - jitter, y + jitter * 0.4, w, h);
+            ctx.fillStyle = rgbStr(cell.fill, opacity * 0.75);
+            ctx.fillRect(x, y, w, h);
+            ctx.restore();
+        }
+    }
+
+    function drawStar(cx, cy, r, rot, color, alpha) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rot);
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const outerAngle = -Math.PI / 2 + (i * 2 * Math.PI / 5);
+            const innerAngle = outerAngle + Math.PI / 5;
+            const ox = Math.cos(outerAngle) * r;
+            const oy = Math.sin(outerAngle) * r;
+            const ix = Math.cos(innerAngle) * r * 0.42;
+            const iy = Math.sin(innerAngle) * r * 0.42;
+            if (i === 0) ctx.moveTo(ox, oy); else ctx.lineTo(ox, oy);
+            ctx.lineTo(ix, iy);
+        }
+        ctx.closePath();
+        ctx.fillStyle = rgbStr(color, alpha);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // ─── ambient drifting sparks past the right edge (very sparse, faint) ──
+    let sparks = [];
+    function buildSparks() {
+        sparks = [];
+        for (let i = 0; i < 16; i++) {
+            const rnd = hash(9000 + i);
+            const rnd2 = hash(9500 + i);
+            const rnd3 = hash(9900 + i);
+            sparks.push({
+                uFrac: 0.90 + rnd * 0.32,
+                vFrac: rnd2,
+                size: 1 + rnd3 * 2.2,
+                phase: rnd3 * Math.PI * 2,
+                speed: 0.4 + rnd * 0.5,
+                white: rnd3 > 0.55,
+            });
+        }
+    }
+
+    function drawSparks(rect, t) {
+        sparks.forEach(s => {
+            const a = 0.5 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+            if (a < 0.04) return;
+            const x = rect.x + s.uFrac * rect.w;
+            const y = rect.y + s.vFrac * rect.h;
+            ctx.fillStyle = rgbStr(s.white ? WHITE : CORAL_LIGHT, a * 0.6);
+            ctx.fillRect(x, y, s.size * dpr, s.size * dpr);
+        });
+    }
+
+    // ─── divider line marking where fraying begins (echoes flag-figure.html) ──
+    function drawDivider(rect) {
+        const dividerU = 0.62;
+        const uFrac = dividerU;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+        ctx.lineWidth = Math.max(0.5, 0.6 * dpr);
+        ctx.setLineDash([2 * dpr, 2.4 * dpr]);
+        ctx.beginPath();
+        const segs = 24;
+        for (let i = 0; i <= segs; i++) {
+            const vFrac = i / segs;
+            const { dy, dx } = waveDisplacement(uFrac, vFrac, lastT);
+            const ampPx = rect.h * 0.11;
+            const x = rect.x + uFrac * rect.w + dx * ampPx;
+            const y = rect.y + vFrac * rect.h + dy * ampPx;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    let lastT = 0;
+
+    // ─── MAIN RENDER ──────────────────────────────────────────────────────
+    function render(t) {
+        lastT = t;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = rgbStr(BG);
+        ctx.fillRect(0, 0, W, H);
+
+        const rect = flagRect();
+
+        // draw stripes/canton cells (back to front by column so drifting
+        // right-edge cells overlap correctly)
+        for (let i = 0; i < cells.length; i++) drawCell(cells[i], rect, t);
+
+        // stars, warped by sampling the same displacement field
+        const ampPx = rect.h * 0.11;
+        stars.forEach(s => {
+            const { dy, dx } = waveDisplacement(s.uFrac, s.vFrac, t);
+            const cx = rect.x + s.uFrac * rect.w + dx * ampPx;
+            const cy = rect.y + s.vFrac * rect.h + dy * ampPx;
+            const flicker = 1 - 0.12 * (0.5 + 0.5 * Math.sin(t * 0.7 + s.flickerPhase));
+            const r = rect.h / ROWS * 0.30;
+            const shade = dy > 0 ? lerpRGB(WHITE, BG, Math.min(0.25, dy * 0.12)) : WHITE;
+            drawStar(cx, cy, r, dx * 0.4, shade, s.opacity * flicker);
+        });
+
+        drawSparks(rect, t);
+        drawDivider(rect);
+
+        // faint vignette so the flag reads as a discrete object
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,107,107,0.05)';
+        ctx.lineWidth = 1 * dpr;
+        ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+        ctx.restore();
+    }
+
+    // ─── ANIMATION LOOP ───────────────────────────────────────────────────
+    function animate(ts) {
+        if (startT === null) startT = ts;
+        const t = (ts - startT) / 1000;
+        render(t);
+        animId = requestAnimationFrame(animate);
+    }
+
+    function start() {
+        if (animId) cancelAnimationFrame(animId);
+        resize();
+        buildCellModel();
+        buildSparks();
+        startT = null;
+        animId = requestAnimationFrame(animate);
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(start, 80);
+    });
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(start);
+    } else {
+        start();
+    }
+
+    // static fallback for reduced-motion users: render one frame, no loop
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+        window.addEventListener('resize', () => {}); // keep resize responsive still
+        resize();
+        buildCellModel();
+        buildSparks();
+        render(0);
+        if (animId) cancelAnimationFrame(animId);
+    }
+})();
+</script>
+</body>
+</html>
