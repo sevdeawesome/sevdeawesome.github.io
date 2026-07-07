@@ -47,84 +47,116 @@
         }
 
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
 
-        .header .links {
-            margin-top: 14px;
+        .header p {
+            font-size: 1.15rem;
+            line-height: 1.7;
         }
 
         .header .links {
             display: flex;
             justify-content: center;
-            gap: 18px;
+            align-items: center;
+            gap: 8px;
             flex-wrap: wrap;
-            margin-top: 14px;
+            margin-top: 22px;
         }
 
         .header .links a {
             color: #ff6b6b;
-            font-size: 1.1rem;
-            padding: 13px 22px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 6px;
+            font-size: 1.05rem;
             font-weight: 500;
             letter-spacing: 0.01em;
-            border: 1px solid rgba(255,255,255,0.10);
-            transition:
-                background 0.18s ease,
-                border-color 0.18s ease,
-                transform 0.18s ease,
-                color 0.18s ease;
-            text-align: center;
+            padding: 2px 4px;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,107,107,0.35);
+            text-underline-offset: 4px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
         }
 
         .header .links a:hover {
-            background: rgba(255,107,107,0.10);
-            border-color: #ff6b6b;
             color: #ff8787;
-            transform: translateY(-1px);
-            animation: none;
-            text-shadow: none;
-        }
-
-        .header .links a:active {
-            transform: translateY(0);
-            background: rgba(255,107,107,0.16);
+            text-decoration-color: #ff8787;
         }
 
         .header .links a:focus-visible {
             outline: 2px solid #ff6b6b;
             outline-offset: 2px;
+            border-radius: 2px;
         }
 
-        .header .links a.substack {
-            /* Make Substack a normal button (inherits all from .links a, no unique styles) */
-        }
-
-        .header .links a.substack:hover {
-            /* No unique hover style, inherits from .links a:hover */
+        .header .links .sep {
+            color: rgba(255,255,255,0.35);
+            user-select: none;
         }
 
         @media (max-width: 600px) {
+            .header p {
+                font-size: 1.05rem;
+            }
+
             .header .links a {
                 font-size: 1rem;
-                padding: 12px 18px;
             }
         }
 
         section {
-            margin-bottom: 50px;
+            border-top: 1px solid rgba(255,255,255,0.09);
+        }
+
+        section:last-of-type {
+            border-bottom: 1px solid rgba(255,255,255,0.09);
         }
 
         h2 {
             font-size: 1.4rem;
             font-weight: 500;
-            margin-bottom: 20px;
             opacity: 0.9;
             letter-spacing: 0.5px;
+            display: inline;
+        }
+
+        section summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 18px 4px;
+            user-select: none;
+        }
+
+        section summary::-webkit-details-marker {
+            display: none;
+        }
+
+        section summary::before {
+            content: "▸";
+            display: inline-block;
+            margin-right: 10px;
+            color: #ff6b6b;
+            transition: transform 0.18s ease;
+        }
+
+        section details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        section summary:hover h2 {
+            opacity: 1;
+        }
+
+        section summary:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        section details > ul {
+            margin-top: 4px;
+            margin-bottom: 26px;
+            padding-left: 24px;
         }
 
         ul {
@@ -208,21 +240,35 @@
     <div class="container">
         <div class="header">
             <h1>Severin Field</h1>
-            <p>PhD student @ Louisville Cybersecurity Lab. I don't think AI is a normal technology.</p>
             <div class="links">
-                <a href="https://sevdeawesome.substack.com/" target="_blank" class="substack">Substack</a>
+                <a href="https://sevdeawesome.substack.com/" target="_blank" class="substack">Blog</a>
+                <span class="sep">·</span>
                 <a href="https://scholar.google.com/citations?user=NqzWouQAAAAJ&hl=en" target="_blank">Google Scholar</a>
-                <a href="https://github.com/sevdeawesome" target="_blank">GitHub</a>   
+                <span class="sep">·</span>
+                <a href="https://github.com/sevdeawesome" target="_blank">GitHub</a>
+                <span class="sep">·</span>
                 <a href="https://twitter.com/sevdeawesome" target="_blank">Twitter</a>
+                <span class="sep">·</span>
                 <a href="mailto:sfiel003@ucr.edu">Email</a>
             </div>
+
+            <br>
+            <p>
+                I am a visiting fellow at the Institute for AI Policy and Strategy. I hold an MS in computer science, have studied interpretability, deception, and persuasion in language models, and have published in several machine learning venues.
+                <br><br>
+                Previously, I was a MATS research fellow, an AI Frameworks Engineer at Intel, and, in high school, a Minecraft modder with hundreds of thousands of downloads.
+                
+                </p>
+            <!-- <p>PhD student @ Louisville Cybersecurity Lab. I don't think AI is a normal technology.</p> -->
+            
         </div>
 
         <!-- <img src
          ="yard_sign.jpg" style="width: 100%; max-width: 500px; margin: 30px auto; display: block; border-radius: 8px; opacity: 0.95;"> -->
 
         <section>
-            <h2>Publications</h2>
+            <details>
+                <summary><h2>Publications</h2></summary>
             <ul>
                 <li>
                     <span class="authors"><strong>Field, S.</strong></span>
@@ -233,7 +279,7 @@
                 <li>
                     <span class="authors"><strong>Field, S.</strong>, Yampolskiy, R.</span>
                     "Sparse Autoencoder Feature Unlearning is Shallow: Lessons from Monolingual Features"
-                    <span class="venue">in submission @ International Conference on Machine Learning</span>, 2026.
+                    <span class="venue">Accepted to Mechanistic Interpretability Workshop @ International Conference on Machine Learning</span>, 2026.
                     <a href="language_icml_overleaf.pdf" target="_blank">[pdf]</a>
                 </li>
                 
@@ -276,14 +322,18 @@
                     <span class="venue">arXiv:2410.02472</span>, 2024. 
                     <a href="https://arxiv.org/abs/2410.02472" target="_blank">[arXiv]</a>
                 </li>
-  
+
 
             </ul>
+            </details>
         </section>
 
         <section>
-            <h2>Blog Posts</h2>
+            <details>
+                <summary><h2>Blog Posts</h2></summary>
             <ul>
+                <li><a href="rsi/index.html">What I Learned Interviewing AI Researchers on Recursive AI-Improvement</a></li>
+                <li><a href="250/index.html">The Case for the American Experiment in a Decade of Algorithms and Autocratization</a></li>
                 <li><a href="https://sevdeawesome.substack.com/p/the-animals-arent-alright" target="_blank">The Animals Aren't Alright</a></li>
                 <li><a href="https://sevdeawesome.substack.com/p/the-west-lost-solar-can-we-avoid" target="_blank">The West Lost Solar, Can We Win AI Hardware?</a></li>
                 <li><a href="https://sevdeawesome.substack.com/p/nvidias-push-to-sell-americas-future" target="_blank">Nvidia's Push to Sell America's Future to China</a></li>
@@ -292,6 +342,7 @@
                 <li><a href="https://sevdeawesome.substack.com/p/whirlwind-tour-of-chain-of-thought" target="_blank">Whirlwind Tour of Chain of Thought Literature Relevant to Automating Alignment Research</a></li>
                 <li><a href="https://sevdeawesome.substack.com/p/a-review-of-weak-to-strong-generalization" target="_blank">A Review of Weak to Strong Generalization</a></li>
             </ul>
+            </details>
         </section>
 
         <div class="claude-signature">
