@@ -97,6 +97,20 @@
             user-select: none;
         }
 
+        /* Quiet inline link in the bio — visible on a careful read, not shouting */
+        .header p a.bio-link {
+            color: inherit;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.35);
+            text-underline-offset: 3px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
+        }
+
+        .header p a.bio-link:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
         /* ---- Accordion sections ---- */
 
         details.accordion {
@@ -295,7 +309,7 @@
             <p>
                 I am a visiting fellow at the Institute for AI Policy and Strategy. I hold an MS in computer science, have studied interpretability, deception, and persuasion in language models, and have published in several machine learning venues.
                 <br><br>
-                Previously, I was a MATS research fellow, an AI Frameworks Engineer at Intel, and, in high school, a Minecraft modder with hundreds of thousands of downloads.
+                Previously, I was a MATS research fellow, an AI Frameworks Engineer at Intel, and, in high school, a <a href="https://www.youtube.com/watch?v=zfzb5SsoI_o" target="_blank" class="bio-link">Minecraft modder</a> with hundreds of thousands of downloads.
 
                 </p>
 
