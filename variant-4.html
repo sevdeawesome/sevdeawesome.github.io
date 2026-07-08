@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Severin Field</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: none;
+            transition: color 0.18s ease;
+        }
+
+        a:hover {
+            color: #ff8787;
+        }
+
+        a:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .layout {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 64px 32px 48px;
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr);
+            column-gap: 72px;
+            align-items: start;
+        }
+
+        /* ---------- Identity column ---------- */
+
+        .identity {
+            position: sticky;
+            top: 64px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .identity h1 {
+            font-size: 2.1rem;
+            font-weight: 500;
+            line-height: 1.2;
+            margin-bottom: 14px;
+        }
+
+        .identity .thesis {
+            font-size: 1.15rem;
+            font-style: italic;
+            color: rgba(255,255,255,0.92);
+            border-left: 3px solid #ff6b6b;
+            padding-left: 14px;
+            margin-bottom: 24px;
+            line-height: 1.55;
+        }
+
+        .identity .bio {
+            font-size: 0.98rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.78);
+        }
+
+        .identity .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            margin-top: 26px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.09);
+        }
+
+        .identity .links a {
+            color: #ff6b6b;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            padding: 2px 4px;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,107,107,0.35);
+            text-underline-offset: 4px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
+        }
+
+        .identity .links a:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
+        .claude-signature {
+            margin-top: 36px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+            line-height: 2;
+        }
+
+        .claude-signature a {
+            color: #ffffff;
+            font-size: 0.75rem;
+        }
+
+        /* ---------- Content column ---------- */
+
+        .content section {
+            margin-bottom: 52px;
+        }
+
+        .content section:last-child {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: rgba(255,255,255,0.55);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding-bottom: 10px;
+            margin-bottom: 24px;
+        }
+
+        h2 .count {
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.05em;
+            margin-left: 6px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* Publications: title dominant, meta muted */
+
+        .pubs li {
+            margin-bottom: 24px;
+        }
+
+        .pubs li:last-child {
+            margin-bottom: 0;
+        }
+
+        .pub-title {
+            display: block;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #ffffff;
+            line-height: 1.45;
+            margin-bottom: 3px;
+        }
+
+        .pub-meta {
+            display: block;
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.55;
+        }
+
+        .pub-meta .authors strong {
+            font-weight: 500;
+            color: rgba(255,255,255,0.75);
+        }
+
+        .pub-meta .venue {
+            font-style: italic;
+        }
+
+        .pub-meta a {
+            white-space: nowrap;
+        }
+
+        .award {
+            display: inline-block;
+            color: #ffd700;
+            font-size: 0.83rem;
+            margin-top: 4px;
+        }
+
+        /* Blog posts: simple linked list */
+
+        .posts li {
+            margin-bottom: 12px;
+            padding-left: 18px;
+            position: relative;
+            line-height: 1.55;
+        }
+
+        .posts li::before {
+            content: "\2192"; /* → */
+            position: absolute;
+            left: 0;
+            color: rgba(255,107,107,0.5);
+            font-size: 0.85rem;
+            top: 1px;
+        }
+
+        .posts li:last-child {
+            margin-bottom: 0;
+        }
+
+        .posts a {
+            color: #ff6b6b;
+            font-size: 1rem;
+        }
+
+        /* Show-more toggle for older entries */
+
+        details.show-more summary {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            display: inline-block;
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            padding: 4px 2px;
+            margin-top: 14px;
+            opacity: 0.85;
+            transition: opacity 0.18s ease;
+        }
+
+        details.show-more summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.show-more summary:hover {
+            opacity: 1;
+        }
+
+        details.show-more summary:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        details.show-more summary .more-label::before {
+            content: attr(data-closed);
+        }
+
+        details.show-more[open] summary .more-label::before {
+            content: attr(data-open);
+        }
+
+        details.show-more > ul {
+            margin-top: 20px;
+        }
+
+        .posts details.show-more > ul {
+            margin-top: 14px;
+        }
+
+        /* ---------- Mobile: single column ---------- */
+
+        @media (max-width: 900px) {
+            .layout {
+                display: block;
+                padding: 44px 22px 40px;
+                max-width: 620px;
+            }
+
+            .identity {
+                position: static;
+                text-align: center;
+                margin-bottom: 48px;
+                padding-bottom: 36px;
+                border-bottom: 1px solid rgba(255,255,255,0.09);
+            }
+
+            .identity h1 {
+                font-size: 1.9rem;
+            }
+
+            .identity .thesis {
+                border-left: none;
+                padding-left: 0;
+            }
+
+            .identity .bio {
+                text-align: left;
+            }
+
+            .identity .links {
+                justify-content: center;
+                border-top: none;
+                padding-top: 0;
+            }
+
+            .claude-signature {
+                margin-top: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+
+        <header class="identity">
+            <h1>Severin Field</h1>
+
+            <p class="thesis">I believe AI is not a normal technology.</p>
+
+            <p class="bio">
+                I am a visiting fellow at the Institute for AI Policy and Strategy. I hold an MS in computer science, have studied interpretability, deception, and persuasion in language models, and have published in several machine learning venues.
+                <br><br>
+                Previously, I was a MATS research fellow, an AI Frameworks Engineer at Intel, a physics undergrad researching gravitational-wave detection, and, in high school, a Minecraft modder with hundreds of thousands of downloads.
+            </p>
+
+            <nav class="links" aria-label="Profiles and contact">
+                <a href="https://sevdeawesome.substack.com/" target="_blank" class="substack">Blog</a>
+                <a href="https://scholar.google.com/citations?user=NqzWouQAAAAJ&hl=en" target="_blank">Google Scholar</a>
+                <a href="https://github.com/sevdeawesome" target="_blank">GitHub</a>
+                <a href="https://twitter.com/sevdeawesome" target="_blank">Twitter</a>
+                <a href="mailto:sfiel003@ucr.edu">Email</a>
+            </nav>
+
+            <div class="claude-signature">
+                <a href="https://claude.ai" target="_blank">made with ♥ by claude</a>
+                <br>
+                <a href="./old/verd/index.html">old portfolio</a>
+            </div>
+        </header>
+
+        <main class="content">
+
+            <section>
+                <h2>Publications <span class="count">(8)</span></h2>
+                <ul class="pubs">
+                    <li>
+                        <span class="pub-title">"Can We Decode Large Language Model Cognition?"</span>
+                        <span class="pub-meta">
+                            <span class="authors"><strong>Field, S.</strong></span> ·
+                            <span class="venue">MS Thesis, University of Louisville</span>, 2026.
+                            <a href="thesis.pdf" target="_blank">[thesis]</a>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="pub-title">"Sparse Autoencoder Feature Unlearning is Shallow: Lessons from Monolingual Features"</span>
+                        <span class="pub-meta">
+                            <span class="authors"><strong>Field, S.</strong>, Yampolskiy, R.</span> ·
+                            <span class="venue">Accepted to Mechanistic Interpretability Workshop @ International Conference on Machine Learning</span>, 2026.
+                            <a href="language_icml_overleaf.pdf" target="_blank">[pdf]</a>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="pub-title">"AI Researchers' Perspectives on Automating AI R&amp;D and Intelligence Explosions"</span>
+                        <span class="pub-meta">
+                            <span class="authors"><strong>Field, S.</strong>, Krueger, D.</span> ·
+                            <span class="venue">arXiv:2603.03338</span>, 2026.
+                            <a href="https://arxiv.org/abs/2603.03338" target="_blank">[arXiv]</a>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="pub-title">"Why do Experts Disagree on Existential Risk and P(doom)? A Survey of AI Experts"</span>
+                        <span class="pub-meta">
+                            <span class="authors"><strong>Field, S.</strong></span> ·
+                            <span class="venue">Journal of AI and Ethics</span>, 2025.
+                            <a href="https://arxiv.org/abs/2502.14870" target="_blank">[arXiv]</a>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="pub-title">"Poser: Unmasking Alignment Faking LLMs by Manipulating Their Internals."</span>
+                        <span class="pub-meta">
+                            <span class="authors">Clymer, J., Juang, C., <strong>Field, S.</strong></span> ·
+                            <span class="venue">arXiv:2405.05466</span>, 2024.
+                            <a href="https://arxiv.org/abs/2405.05466" target="_blank">[arXiv]</a>
+                        </span>
+                        <span class="award">✨ SafeBench AI Safety $20,000 Prize Winner</span>
+                    </li>
+                </ul>
+                <details class="show-more">
+                    <summary>
+                        <span class="more-label" data-closed="show 3 more publications ↓" data-open="show fewer publications ↑"></span>
+                    </summary>
+                    <ul class="pubs">
+                        <li>
+                            <span class="pub-title">"What Features in Prompts Jailbreak LLMs? Investigating the Mechanisms Behind Attacks."</span>
+                            <span class="pub-meta">
+                                <span class="authors">Kirsch, N., <strong>Field, S.</strong>, Casper, S.</span> ·
+                                <span class="venue">NeurIPS 2024 Workshop on Red Teaming Generative AI</span>, 2024.
+                                <a href="https://arxiv.org/abs/2411.03343" target="_blank">[arXiv]</a>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="pub-title">"Assessing Controllability through Compliance with Irrational Orders"</span>
+                            <span class="pub-meta">
+                                <span class="authors">Yampolskiy, R., <strong>Field, S.</strong></span> ·
+                                <span class="venue">Handbook of Human-Centered Artificial Intelligence</span>, 2026.
+                                <a href="https://www.researchgate.net/publication/396874740_Testing_Obedience_and_Control_in_AGI_Exploring_Irrational_Commands_and_the_AI_Control_Problem" target="_blank">[ResearchGate]</a>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="pub-title">"Meta-Models: An Architecture for Decoding LLM Behaviors Through Interpreted Embeddings and Natural Language."</span>
+                            <span class="pub-meta">
+                                <span class="authors">Costranelli, A., Alan, M., <strong>Field, S.</strong></span> ·
+                                <span class="venue">arXiv:2410.02472</span>, 2024.
+                                <a href="https://arxiv.org/abs/2410.02472" target="_blank">[arXiv]</a>
+                            </span>
+                        </li>
+                    </ul>
+                </details>
+            </section>
+
+            <section>
+                <h2>Blog Posts <span class="count">(9)</span></h2>
+                <ul class="posts">
+                    <li><a href="rsi/index.html">What I Learned Interviewing AI Researchers on Recursive AI-Improvement</a></li>
+                    <li><a href="250/index.html">The Case for the American Experiment in a Decade of Algorithms and Autocratization</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/the-animals-arent-alright" target="_blank">The Animals Aren't Alright</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/the-west-lost-solar-can-we-avoid" target="_blank">The West Lost Solar, Can We Win AI Hardware?</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/nvidias-push-to-sell-americas-future" target="_blank">Nvidia's Push to Sell America's Future to China</a></li>
+                </ul>
+                <details class="show-more">
+                    <summary>
+                        <span class="more-label" data-closed="show 4 more posts ↓" data-open="show fewer posts ↑"></span>
+                    </summary>
+                    <ul class="posts">
+                        <li><a href="https://sevdeawesome.substack.com/p/the-speed-dilemma" target="_blank">The Speed Dilemma</a></li>
+                        <li><a href="https://sevdeawesome.substack.com/p/i-read-every-survey-on-ai-researchers" target="_blank">I Read Every Survey of AI Researchers So You Don't Have To</a></li>
+                        <li><a href="https://sevdeawesome.substack.com/p/whirlwind-tour-of-chain-of-thought" target="_blank">Whirlwind Tour of Chain of Thought Literature Relevant to Automating Alignment Research</a></li>
+                        <li><a href="https://sevdeawesome.substack.com/p/a-review-of-weak-to-strong-generalization" target="_blank">A Review of Weak to Strong Generalization</a></li>
+                    </ul>
+                </details>
+            </section>
+
+        </main>
+    </div>
+</body>
+</html>

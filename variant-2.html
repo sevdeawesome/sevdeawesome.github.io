@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Severin Field</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+      -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Bungee&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Comic+Relief:wght@400;700&family=Rubik+Gemstones&family=Rubik+Mono+One&family=Rubik+Pixels&family=Rubik+Scribble&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Schoolbell&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* font-family: serif; */
+            font-family: 'Rubik', serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .header {
+            margin-bottom: 44px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+
+        .header p {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        .header p.thesis {
+            font-size: 1.3rem;
+            font-style: italic;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .header .links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
+        .header .links a {
+            color: #ff6b6b;
+            font-size: 1.05rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            padding: 2px 4px;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,107,107,0.35);
+            text-underline-offset: 4px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
+        }
+
+        .header .links a:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
+        .header .links a:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .header .links .sep {
+            color: rgba(255,255,255,0.35);
+            user-select: none;
+        }
+
+        /* ---- Card panels ---- */
+
+        details.card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            margin-bottom: 22px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        details.card:hover {
+            border-color: rgba(255,107,107,0.4);
+        }
+
+        details.card summary {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 22px 24px;
+            border-radius: 12px;
+        }
+
+        details.card summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.card summary:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
+        }
+
+        .card-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            opacity: 0.95;
+        }
+
+        .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 13px;
+            background: rgba(255,107,107,0.15);
+            border: 1px solid rgba(255,107,107,0.3);
+            color: #ff8787;
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .chevron {
+            margin-left: auto;
+            width: 9px;
+            height: 9px;
+            border-right: 2px solid rgba(255,255,255,0.45);
+            border-bottom: 2px solid rgba(255,255,255,0.45);
+            transform: rotate(45deg) translateY(-2px);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        details.card:hover .chevron {
+            border-color: rgba(255,107,107,0.7);
+        }
+
+        details.card[open] .chevron {
+            transform: rotate(225deg) translateY(-2px);
+        }
+
+        .chip {
+            align-self: flex-start;
+            display: inline-block;
+            max-width: 100%;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .chip-gold {
+            background: rgba(255,215,0,0.08);
+            border-color: rgba(255,215,0,0.3);
+            color: #ffd700;
+        }
+
+        .card-body {
+            padding: 4px 24px 12px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .card-body ul {
+            list-style: none;
+        }
+
+        .card-body li {
+            padding: 16px 0;
+            line-height: 1.7;
+        }
+
+        .card-body li + li {
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        /* Glitch effect on hover */
+        a:hover {
+            animation: glitch 0.3s ease;
+        }
+
+        @keyframes glitch {
+            0%, 100% {
+                text-shadow:
+                    0.02em 0 0 rgba(255,0,0,0.75),
+                    -0.02em -0 0 rgba(0,255,0,0.75),
+                    0.025em 0.05em 0 rgba(0,0,255,0.75);
+            }
+            15% {
+                text-shadow:
+                    0.5em 0 0 rgba(255,0,0,0.75),
+                    -0.5em -0 0 rgba(0,255,0,0.75),
+                    0.25em 0.05em 0 rgba(0,0,255,0.75);
+            }
+            50% {
+                text-shadow:
+                    -0.02em 0.02em 0 rgba(255,0,0,0.75),
+                    0.02em -0.02em 0 rgba(0,255,0,0.75),
+                    -0.025em 0.05em 0 rgba(0,0,255,0.75);
+            }
+        }
+
+        .year {
+            opacity: 0.6;
+            font-size: 0.9rem;
+            margin-left: 8px;
+        }
+
+        .venue {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .authors {
+            opacity: 0.9;
+        }
+
+        .award {
+            color: #ffd700;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        .claude-signature {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .claude-signature a {
+            color: #ffffff;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .header p {
+                font-size: 1.05rem;
+            }
+
+            .header .links a {
+                font-size: 1rem;
+            }
+
+            details.card summary {
+                padding: 18px;
+            }
+
+            .card-body {
+                padding: 4px 18px 10px;
+            }
+
+            .card-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Severin Field</h1>
+            <div class="links">
+                <a href="https://sevdeawesome.substack.com/" target="_blank" class="substack">Blog</a>
+                <span class="sep">·</span>
+                <a href="https://scholar.google.com/citations?user=NqzWouQAAAAJ&hl=en" target="_blank">Google Scholar</a>
+                <span class="sep">·</span>
+                <a href="https://github.com/sevdeawesome" target="_blank">GitHub</a>
+                <span class="sep">·</span>
+                <a href="https://twitter.com/sevdeawesome" target="_blank">Twitter</a>
+                <span class="sep">·</span>
+                <a href="mailto:sfiel003@ucr.edu">Email</a>
+            </div>
+
+            <br>
+            <p class="thesis">I believe AI is not a normal technology.</p>
+
+            <p>
+                I am a visiting fellow at the Institute for AI Policy and Strategy. I hold an MS in computer science, have studied interpretability, deception, and persuasion in language models, and have published in several machine learning venues.
+                <br><br>
+                Previously, I was a MATS research fellow, an AI Frameworks Engineer at Intel, a physics undergrad researching gravitational-wave detection, and, in high school, a Minecraft modder with hundreds of thousands of downloads.
+
+                </p>
+
+        </div>
+
+        <!-- <img src
+         ="yard_sign.jpg" style="width: 100%; max-width: 500px; margin: 30px auto; display: block; border-radius: 8px; opacity: 0.95;"> -->
+
+        <details class="card">
+            <summary>
+                <span class="card-title-row">
+                    <span class="card-title">Publications</span>
+                    <span class="count">8</span>
+                    <span class="chevron" aria-hidden="true"></span>
+                </span>
+                <span class="chip chip-gold">✨ SafeBench $20,000 Prize</span>
+            </summary>
+            <div class="card-body">
+                <ul>
+                    <li>
+                        <span class="authors"><strong>Field, S.</strong></span>
+                        "Can We Decode Large Language Model Cognition?"
+                        <span class="venue">MS Thesis, University of Louisville</span>, 2026.
+                        <a href="thesis.pdf" target="_blank">[thesis]</a>
+                    </li>
+                    <li>
+                        <span class="authors"><strong>Field, S.</strong>, Yampolskiy, R.</span>
+                        "Sparse Autoencoder Feature Unlearning is Shallow: Lessons from Monolingual Features"
+                        <span class="venue">Accepted to Mechanistic Interpretability Workshop @ International Conference on Machine Learning</span>, 2026.
+                        <a href="language_icml_overleaf.pdf" target="_blank">[pdf]</a>
+                    </li>
+                    <li>
+                        <span class="authors"><strong>Field, S.</strong>, Krueger, D.</span>
+                        "AI Researchers' Perspectives on Automating AI R&D and Intelligence Explosions"
+                        <span class="venue">arXiv:2603.03338</span>, 2026.
+                        <a href="https://arxiv.org/abs/2603.03338" target="_blank">[arXiv]</a>
+                    </li>
+                    <li>
+                        <span class="authors"><strong>Field, S.</strong></span>
+                        "Why do Experts Disagree on Existential Risk and P(doom)? A Survey of AI Experts"
+                        <span class="venue">Journal of AI and Ethics</span>, 2025.
+                        <a href="https://arxiv.org/abs/2502.14870" target="_blank">[arXiv]</a>
+                    </li>
+                    <li>
+                        <span class="authors">Clymer, J., Juang, C., <strong>Field, S.</strong></span>
+                        "Poser: Unmasking Alignment Faking LLMs by Manipulating Their Internals."
+                        <span class="venue">arXiv:2405.05466</span>, 2024.
+                        <a href="https://arxiv.org/abs/2405.05466" target="_blank">[arXiv]</a>
+                        <span class="award">✨ SafeBench AI Safety $20,000 Prize Winner</span>
+                    </li>
+                    <li>
+                        <span class="authors">Kirsch, N., <strong>Field, S.</strong>, Casper, S.</span>
+                        "What Features in Prompts Jailbreak LLMs? Investigating the Mechanisms Behind Attacks."
+                        <span class="venue">NeurIPS 2024 Workshop on Red Teaming Generative AI</span>, 2024.
+                        <a href="https://arxiv.org/abs/2411.03343" target="_blank">[arXiv]</a>
+                    </li>
+                    <li>
+                        <span class="authors">Yampolskiy, R., <strong>Field, S.</strong></span>
+                        "Assessing Controllability through Compliance with Irrational Orders"
+                        <span class="venue">Handbook of Human-Centered Artificial Intelligence</span>, 2026.
+                        <a href="https://www.researchgate.net/publication/396874740_Testing_Obedience_and_Control_in_AGI_Exploring_Irrational_Commands_and_the_AI_Control_Problem" target="_blank">[ResearchGate]</a>
+                    </li>
+                    <li>
+                        <span class="authors">Costranelli, A., Alan, M., <strong>Field, S.</strong></span>
+                        "Meta-Models: An Architecture for Decoding LLM Behaviors Through Interpreted Embeddings and Natural Language."
+                        <span class="venue">arXiv:2410.02472</span>, 2024.
+                        <a href="https://arxiv.org/abs/2410.02472" target="_blank">[arXiv]</a>
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <details class="card">
+            <summary>
+                <span class="card-title-row">
+                    <span class="card-title">Blog Posts</span>
+                    <span class="count">9</span>
+                    <span class="chevron" aria-hidden="true"></span>
+                </span>
+                <span class="chip">9 essays on AI policy &amp; safety</span>
+            </summary>
+            <div class="card-body">
+                <ul>
+                    <li><a href="rsi/index.html">What I Learned Interviewing AI Researchers on Recursive AI-Improvement</a></li>
+                    <li><a href="250/index.html">The Case for the American Experiment in a Decade of Algorithms and Autocratization</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/the-animals-arent-alright" target="_blank">The Animals Aren't Alright</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/the-west-lost-solar-can-we-avoid" target="_blank">The West Lost Solar, Can We Win AI Hardware?</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/nvidias-push-to-sell-americas-future" target="_blank">Nvidia's Push to Sell America's Future to China</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/the-speed-dilemma" target="_blank">The Speed Dilemma</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/i-read-every-survey-on-ai-researchers" target="_blank">I Read Every Survey of AI Researchers So You Don't Have To</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/whirlwind-tour-of-chain-of-thought" target="_blank">Whirlwind Tour of Chain of Thought Literature Relevant to Automating Alignment Research</a></li>
+                    <li><a href="https://sevdeawesome.substack.com/p/a-review-of-weak-to-strong-generalization" target="_blank">A Review of Weak to Strong Generalization</a></li>
+                </ul>
+            </div>
+        </details>
+
+        <div class="claude-signature">
+            <a href="https://claude.ai" target="_blank">made with ♥ by claude</a>
+            <br><br>
+            <a href="./old/verd/index.html">old portfolio</a>
+        </div>
+    </div>
+</body>
+</html>

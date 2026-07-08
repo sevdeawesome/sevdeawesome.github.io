@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Variants — Compare</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Rubik', system-ui, sans-serif;
+        background: #111;
+        color: #fff;
+        padding: 24px;
+    }
+    h1 { font-size: 1.3rem; font-weight: 500; margin-bottom: 4px; }
+    .hint { opacity: 0.5; font-size: 0.85rem; margin-bottom: 20px; }
+    .row {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        align-items: flex-start;
+    }
+    .panel {
+        flex: 0 0 360px;
+        background: #1a1a1a;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .panel header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .panel header .name { font-weight: 500; font-size: 0.95rem; }
+    .panel header .desc { display: block; font-size: 0.75rem; opacity: 0.55; font-weight: 400; margin-top: 2px; }
+    .panel header a {
+        color: #ff6b6b;
+        text-decoration: none;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    .panel header a:hover { text-decoration: underline; }
+    .frame-clip {
+        width: 358px;
+        height: 780px;
+        overflow: hidden;
+        position: relative;
+    }
+    .frame-clip iframe {
+        width: 716px;
+        height: 1560px;
+        border: 0;
+        transform: scale(0.5);
+        transform-origin: top left;
+    }
+</style>
+</head>
+<body>
+    <h1>Homepage design variants</h1>
+    <p class="hint">Scroll sideways to compare. Panels are interactive (click the accordions!) — use "open ↗" for the full-size page.</p>
+    <div class="row">
+        <div class="panel">
+            <header>
+                <span class="name">1 · Minimal accordion
+                    <span class="desc">collapsed rows, counts + teaser lines</span>
+                </span>
+                <a href="variant-1.html" target="_blank">open ↗</a>
+            </header>
+            <div class="frame-clip"><iframe src="variant-1.html" title="Variant 1"></iframe></div>
+        </div>
+        <div class="panel">
+            <header>
+                <span class="name">2 · Card accordion
+                    <span class="desc">collapsed panels, count badges + highlight chips</span>
+                </span>
+                <a href="variant-2.html" target="_blank">open ↗</a>
+            </header>
+            <div class="frame-clip"><iframe src="variant-2.html" title="Variant 2"></iframe></div>
+        </div>
+        <div class="panel">
+            <header>
+                <span class="name">4 · Sidebar layout
+                    <span class="desc">sticky identity column + content column</span>
+                </span>
+                <a href="variant-4.html" target="_blank">open ↗</a>
+            </header>
+            <div class="frame-clip"><iframe src="variant-4.html" title="Variant 4"></iframe></div>
+        </div>
+    </div>
+</body>
+</html>
