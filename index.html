@@ -216,6 +216,72 @@
             list-style: none;
         }
 
+        /* ---- Stuff I like: bare-minimum gutter list ---- */
+
+        .stuff-list li {
+            position: relative;
+            display: grid;
+            grid-template-columns: 74px 1fr;
+            column-gap: 14px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .stuff-list .type {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: lowercase;
+            padding-top: 0.2em;
+            line-height: 1.6;
+        }
+
+        .stuff-list .entry {
+            margin: 0;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .stuff-list a {
+            color: #ffffff;
+            position: static;
+            display: inline;
+            transition: color 0.18s ease;
+        }
+
+        .stuff-list a.title::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+        }
+
+        .stuff-list li:hover a.title {
+            color: #ff6b6b;
+        }
+
+        .stuff-list a:hover {
+            animation: none;
+            color: #ff6b6b;
+        }
+
+        .stuff-list a.sub {
+            position: relative;
+            z-index: 1;
+            color: rgba(255,255,255,0.55);
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.3);
+            text-underline-offset: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .stuff-list li {
+                grid-template-columns: 62px 1fr;
+                column-gap: 10px;
+            }
+
+            .stuff-list .type {
+                font-size: 0.72rem;
+            }
+        }
+
         li {
             margin-bottom: 16px;
             line-height: 1.7;
@@ -411,22 +477,58 @@
                 </span>
             </summary>
             
-            <ul>
-                <li>Stephen Kotkin — How Stalin became the most powerful dictator in history [ <a href="https://www.youtube.com/watch?v=YMfd3EoHfPI">podcast</a>] I also like Kotkin's <a href="https://en.wikipedia.org/wiki/Stalin:_Paradoxes_of_Power,_1878%E2%80%931928">books</a>!</li>
-                <li>The Power of Intelligence [<a href="https://www.youtube.com/watch?v=q9Figerh89g">short video</a>] helped me reason about the power of intelligence</li>
-                <li>Projections: A Story of Human Emotions by Karl Deisseroth [<a href="https://www.amazon.com/dp/1984853694?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">book</a>] I REALLY like this book, and it's written by the father of optogenetics</li>
-                <li>Situational Awareness [<a href="https://situational-awareness.ai/" target="_blank">essay</a>] helped me appreciate the gravity of the current AI situation..</li>
-                <li>Are We Smart Enough to Know How Smart Animals Are? by Frans de Waal, the most esteemed primatologist of my lifetime[<a href="https://www.amazon.com/dp/0393353664?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">book</a>] -- a good way to reason about nonhuman minds is to look at animals. This book changed how I reason about intelligence</li>
-                <li>Sarah Paine [<a href="https://www.youtube.com/playlist?list=PLd7-bHaQwnthnOed1a85mF7L-Ki3kdiqp" target="_blank">Lecture Series</a>] -- motivated me to read up on grand strategy and world history</li>
-                <li>The AI Doc [<a href="https://www.youtube.com/watch?v=xkPbV3IRe4Y" target="_blank">movie</a>] -- this movie includes AI optimists, pessimists, skeptics, and believers and somehow does justice to them all!</li>
-                <li>Why the Future Doesn't Need Us by Bill Joy [<a href="https://sites.cc.gatech.edu/computing/nano/documents/Joy%20-%20Why%20the%20Future%20Doesn%27t%20Need%20Us.pdf" target="_blank">essay</a>] a Wired article by one of the most influential tech entrepreneurs way ahead of his time.</li>
-                <li>Invisible Rulers by DiResta [<a href="https://www.amazon.com/dp/1541703375?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">book</a>] -- made me concerned over the vulnerability of open societies</li>
-                <li>The alignment problem of 1776 [<a href="https://blog.peterwildeford.com/p/the-alignment-problem-of-1776" target="_blank">blog post</a>] -- the most prescient blog post as of today</li>
-                <li>The King and The Golem [ <a href="https://www.youtube.com/watch?v=KUkHhVYv3jU">short video</a>] -- eventually, you have to take a leap of faith..</li>
-                <li>The Toxoplasma of Rage [<a href="https://www.slatestarcodexabridged.com/The-Toxoplasma-Of-Rage" target="_blank">blog post</a>] a heuristic on why rage-enducing ideas spread </li>
-        
+            <ul class="stuff-list">
+                <li>
+                    <span class="type">podcast</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=YMfd3EoHfPI">Stephen Kotkin — How Stalin became the most powerful dictator in history</a> I also like Kotkin's <a class="sub" href="https://en.wikipedia.org/wiki/Stalin:_Paradoxes_of_Power,_1878%E2%80%931928">books</a>!</p>
+                </li>
+                <li>
+                    <span class="type">video</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=q9Figerh89g">The Power of Intelligence</a> a five-minute case that intelligence is the most powerful force we know</p>
+                </li>
+                <li>
+                    <span class="type">book</span>
+                    <p class="entry"><a class="title" href="https://www.amazon.com/dp/1984853694?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">Projections: A Story of Human Emotions by Karl Deisseroth</a> I REALLY like this book, and it's written by the father of optogenetics</p>
+                </li>
+                <li>
+                    <span class="type">essay</span>
+                    <p class="entry"><a class="title" href="https://situational-awareness.ai/" target="_blank">Situational Awareness</a> helped me appreciate the gravity of the current AI situation.</p>
+                </li>
+                <li>
+                    <span class="type">book</span>
+                    <p class="entry"><a class="title" href="https://www.amazon.com/dp/0393353664?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">Are We Smart Enough to Know How Smart Animals Are? by Frans de Waal</a> the most esteemed primatologist of my lifetime — changed how I think about minds unlike our own.</p>
+                </li>
+                <li>
+                    <span class="type">lectures</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/playlist?list=PLd7-bHaQwnthnOed1a85mF7L-Ki3kdiqp" target="_blank">Sarah Paine</a> motivated me to read up on grand strategy and world history</p>
+                </li>
+                <li>
+                    <span class="type">film</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=xkPbV3IRe4Y" target="_blank">The AI Doc</a> this movie includes AI optimists, pessimists, skeptics, and believers and somehow does justice to them all!</p>
+                </li>
+                <li>
+                    <span class="type">essay</span>
+                    <p class="entry"><a class="title" href="https://sites.cc.gatech.edu/computing/nano/documents/Joy%20-%20Why%20the%20Future%20Doesn%27t%20Need%20Us.pdf" target="_blank">Why the Future Doesn't Need Us by Bill Joy</a> a Wired article by the Sun Microsystems co-founder, way ahead of his time.</p>
+                </li>
+                <li>
+                    <span class="type">book</span>
+                    <p class="entry"><a class="title" href="https://www.amazon.com/dp/1541703375?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">Invisible Rulers by DiResta</a> made me concerned over the vulnerability of open societies</p>
+                </li>
+                <li>
+                    <span class="type">post</span>
+                    <p class="entry"><a class="title" href="https://blog.peterwildeford.com/p/the-alignment-problem-of-1776" target="_blank">The alignment problem of 1776</a> the most prescient blog post as of today</p>
+                </li>
+                <li>
+                    <span class="type">video</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=KUkHhVYv3jU">The King and The Golem</a> eventually, you have to take a leap of faith…</p>
+                </li>
+                <li>
+                    <span class="type">post</span>
+                    <p class="entry"><a class="title" href="https://www.slatestarcodexabridged.com/The-Toxoplasma-Of-Rage" target="_blank">The Toxoplasma of Rage</a> a heuristic on why rage-inducing ideas spread</p>
+                </li>
+
                 <!-- <li>Sort by Controversial [<a href="https://slatestarcodex.com/2018/10/30/sort-by-controversial/" target="_blank">blog post</a>]</li> -->
-         
+
             </ul>
         </details>
 
