@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explaining AI Safety</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+            margin: 36px 0 10px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,107,107,0.35);
+            text-underline-offset: 4px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
+        }
+
+        a:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
+        .primary a {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .more li a {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration-color: rgba(255,255,255,0.25);
+        }
+
+        .note {
+            display: block;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+        }
+
+        .more li a:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Explaining AI Safety in DC</h1>
+
+        <ul>
+            <li class="primary"><a href="https://docs.google.com/presentation/d/18_YyvrR6X9w05PD19kdLIA2XN1NMMFQ8bZ_e-2ckWXc/edit?usp=sharing">Slides (gated)</a></li>
+            <li><a href="how_to_dress_in_dc.pdf">How to Dress in DC</a></li>
+        </ul>
+
+        <h2>Recommended Books</h2>
+        <ul class="more">
+            <li>
+                <a href="https://www.amazon.com/dp/0815369824?lv=shuf&channelId=500&plpRedirect=mhFallback">
+                    AI Safety and Security by Roman V. Yampolskiy
+                </a>
+                <span class="note">The canonical edited volume on theoretical AI safety.</span>
+            </li>
+            <li>
+                <a href="https://intelligence.org/files/CEV.pdf">
+                    Coherent Extrapolated Volition by Eliezer Yudkowsky
+                </a>
+                <span class="note">In my opinion, still the best attempt at specifying what alignment should aim for.</span>
+            </li>
+            <li>
+                <a href="https://themlbook.com/">
+                    The 100-Page Machine Learning Book by Andriy Burkov
+                </a>
+                <span class="note">A quick, readable recap of the fundamentals of machine learning.</span>
+            </li>
+        </ul>
+
+        <h2>Recommended Blogs</h2>
+        <ul class="more">
+            <li>
+                <a href="https://newsletter.mlsafety.org/">
+                    ML Safety Newsletter
+                </a>
+            </li>
+            <li>
+                <a href="https://blog.peterwildeford.com/">
+                    Peter Wildeford's Blog (blog.peterwildeford.com)
+                </a>
+            </li>
+            <li>
+                <a href="https://thezvi.substack.com/">
+                    Don't Worry About the Vase
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
