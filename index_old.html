@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Severin Field</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Bungee&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Comic+Relief:wght@400;700&family=Rubik+Gemstones&family=Rubik+Mono+One&family=Rubik+Pixels&family=Rubik+Scribble&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Schoolbell&family=TASA+Explorer:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rubik', serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .header {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+
+        .header p {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        .header p.thesis {
+            font-size: 1.3rem;
+            font-style: italic;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .header .links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
+        .header .links a {
+            color: #ff6b6b;
+            font-size: 1.05rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            padding: 2px 4px;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,107,107,0.35);
+            text-underline-offset: 4px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
+        }
+
+        .header .links a:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
+        .header .links a:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .header .links .sep {
+            color: rgba(255,255,255,0.35);
+            user-select: none;
+        }
+
+        /* Quiet inline link in the bio — visible on a careful read, not shouting */
+        .header p a.bio-link {
+            color: inherit;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.35);
+            text-underline-offset: 3px;
+            transition: color 0.18s ease, text-decoration-color 0.18s ease;
+        }
+
+        .header p a.bio-link:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
+        /* ---- Accordion sections ---- */
+
+        details.accordion {
+            border-top: 1px solid rgba(255,255,255,0.12);
+        }
+
+        details.accordion:last-of-type {
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+
+        details.accordion summary {
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            padding: 26px 4px;
+            transition: background 0.18s ease;
+        }
+
+        details.accordion summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.accordion summary:hover {
+            background: rgba(255,255,255,0.025);
+        }
+
+        details.accordion summary:focus-visible {
+            outline: 2px solid #ff6b6b;
+            outline-offset: -2px;
+            border-radius: 2px;
+        }
+
+        details.accordion .caret {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            line-height: 1;
+            flex: none;
+            transform: rotate(0deg);
+            transition: transform 0.2s ease;
+        }
+
+        details.accordion[open] .caret {
+            transform: rotate(90deg);
+        }
+
+        details.accordion .summary-text {
+            min-width: 0;
+        }
+
+        details.accordion h2 {
+            display: inline;
+            font-size: 1.4rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        details.accordion .count {
+            color: rgba(255,255,255,0.45);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        details.accordion .teaser {
+            display: block;
+            margin-top: 4px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        details.accordion > ul {
+            padding: 4px 4px 30px 27px;
+        }
+
+        @media (max-width: 600px) {
+            .header p {
+                font-size: 1.05rem;
+            }
+
+            .header .links a {
+                font-size: 1rem;
+            }
+
+            details.accordion summary {
+                padding: 22px 2px;
+                gap: 11px;
+            }
+
+            details.accordion h2 {
+                font-size: 1.25rem;
+            }
+
+            details.accordion > ul {
+                padding-left: 2px;
+            }
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* ---- Stuff I like: bare-minimum gutter list ---- */
+
+        .stuff-list li {
+            position: relative;
+            display: grid;
+            grid-template-columns: 74px 1fr;
+            column-gap: 14px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .stuff-list .type {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: lowercase;
+            padding-top: 0.2em;
+            line-height: 1.6;
+        }
+
+        .stuff-list .entry {
+            margin: 0;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .stuff-list a {
+            color: #ffffff;
+            position: static;
+            display: inline;
+            transition: color 0.18s ease;
+        }
+
+        .stuff-list a.title::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+        }
+
+        .stuff-list li:hover a.title {
+            color: #ff6b6b;
+        }
+
+        .stuff-list a:hover {
+            animation: none;
+            color: #ff6b6b;
+        }
+
+        .stuff-list a.sub {
+            position: relative;
+            z-index: 1;
+            color: rgba(255,255,255,0.55);
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.3);
+            text-underline-offset: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .stuff-list li {
+                grid-template-columns: 62px 1fr;
+                column-gap: 10px;
+            }
+
+            .stuff-list .type {
+                font-size: 0.72rem;
+            }
+        }
+
+        li {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        li:last-child {
+            margin-bottom: 0;
+        }
+
+        a {
+            color: #ff6b6b;
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        /* Glitch effect on hover */
+        a:hover {
+            animation: glitch 0.3s ease;
+        }
+
+        @keyframes glitch {
+            0%, 100% {
+                text-shadow:
+                    0.02em 0 0 rgba(255,0,0,0.75),
+                    -0.02em -0 0 rgba(0,255,0,0.75),
+                    0.025em 0.05em 0 rgba(0,0,255,0.75);
+            }
+            15% {
+                text-shadow:
+                    0.5em 0 0 rgba(255,0,0,0.75),
+                    -0.5em -0 0 rgba(0,255,0,0.75),
+                    0.25em 0.05em 0 rgba(0,0,255,0.75);
+            }
+            50% {
+                text-shadow:
+                    -0.02em 0.02em 0 rgba(255,0,0,0.75),
+                    0.02em -0.02em 0 rgba(0,255,0,0.75),
+                    -0.025em 0.05em 0 rgba(0,0,255,0.75);
+            }
+        }
+
+        .venue {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .authors {
+            opacity: 0.9;
+        }
+
+        .award {
+            color: #ffd700;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        .claude-signature {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .claude-signature a {
+            color: #ffffff;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Severin Field</h1>
+            <div class="links">
+                <a href="https://sevdeawesome.substack.com/" target="_blank" class="substack">Blog</a>
+                <span class="sep">·</span>
+                <a href="https://scholar.google.com/citations?user=NqzWouQAAAAJ&hl=en" target="_blank">Google Scholar</a>
+                <span class="sep">·</span>
+                <a href="https://github.com/sevdeawesome" target="_blank">GitHub</a>
+                <span class="sep">·</span>
+                <a href="https://twitter.com/sevdeawesome" target="_blank">Twitter</a>
+                <span class="sep">·</span>
+                <a href="mailto:sfiel003@ucr.edu">Email</a>
+            </div>
+
+            <br>
+            <p class="thesis">I believe AI is not a normal technology.</p>
+
+            <p>
+                I am a visiting fellow at the Institute for AI Policy and Strategy. I hold an MS in computer science, have studied interpretability, deception, and persuasion in language models, and have published in several machine learning venues.
+                <br><br>
+                Previously, I was a MATS research fellow, an AI Frameworks Engineer at Intel, and, in high school, a <a href="https://www.youtube.com/watch?v=zfzb5SsoI_o" target="_blank" class="bio-link">Minecraft modder</a> with hundreds of thousands of downloads.
+
+                </p>
+
+        </div>
+
+        <!-- <img src
+         ="yard_sign.jpg" style="width: 100%; max-width: 500px; margin: 30px auto; display: block; border-radius: 8px; opacity: 0.95;"> -->
+
+        <details class="accordion">
+            <summary>
+                <span class="caret" aria-hidden="true">▸</span>
+                <span class="summary-text">
+                    <h2>Publications<span class="count">8</span></h2>
+                    <span class="teaser">latest: Can We Decode Large Language Model Cognition?</span>
+                </span>
+            </summary>
+            <ul>
+                <li>
+                    <span class="authors"><strong>Field, S.</strong></span>
+                    "Can We Decode Large Language Model Cognition?"
+                    <span class="venue">MS Thesis, University of Louisville</span>, 2026.
+                    <a href="thesis.pdf" target="_blank">[thesis]</a>
+                </li>
+                <li>
+                    <span class="authors"><strong>Field, S.</strong>, Yampolskiy, R.</span>
+                    "Sparse Autoencoder Feature Unlearning is Shallow: Lessons from Monolingual Features"
+                    <span class="venue">Accepted to Mechanistic Interpretability Workshop @ International Conference on Machine Learning</span>, 2026.
+                    <a href="language_icml_overleaf.pdf" target="_blank">[pdf]</a>
+                </li>
+                <li>
+                    <span class="authors"><strong>Field, S.</strong>, Krueger, D.</span>
+                    "AI Researchers' Perspectives on Automating AI R&D and Intelligence Explosions"
+                    <span class="venue">arXiv:2603.03338</span>, 2026.
+                    <a href="https://arxiv.org/abs/2603.03338" target="_blank">[arXiv]</a>
+                </li>
+                <li>
+                    <span class="authors"><strong>Field, S.</strong></span>
+                    "Why do Experts Disagree on Existential Risk and P(doom)? A Survey of AI Experts"
+                    <span class="venue">Journal of AI and Ethics</span>, 2025.
+                    <a href="https://arxiv.org/abs/2502.14870" target="_blank">[arXiv]</a>
+                </li>
+                <li>
+                    <span class="authors">Clymer, J., Juang, C., <strong>Field, S.</strong></span>
+                    "Poser: Unmasking Alignment Faking LLMs by Manipulating Their Internals."
+                    <span class="venue">arXiv:2405.05466</span>, 2024.
+                    <a href="https://arxiv.org/abs/2405.05466" target="_blank">[arXiv]</a>
+                    <span class="award">✨ SafeBench AI Safety $20,000 Prize Winner</span>
+                </li>
+                <li>
+                    <span class="authors">Kirsch, N., <strong>Field, S.</strong>, Casper, S.</span>
+                    "What Features in Prompts Jailbreak LLMs? Investigating the Mechanisms Behind Attacks."
+                    <span class="venue">NeurIPS 2024 Workshop on Red Teaming Generative AI</span>, 2024.
+                    <a href="https://arxiv.org/abs/2411.03343" target="_blank">[arXiv]</a>
+                </li>
+                <li>
+                    <span class="authors">Yampolskiy, R., <strong>Field, S.</strong></span>
+                    "Assessing Controllability through Compliance with Irrational Orders"
+                    <span class="venue">Handbook of Human-Centered Artificial Intelligence</span>, 2026.
+                    <a href="https://www.researchgate.net/publication/396874740_Testing_Obedience_and_Control_in_AGI_Exploring_Irrational_Commands_and_the_AI_Control_Problem" target="_blank">[ResearchGate]</a>
+                </li>
+                <li>
+                    <span class="authors">Costranelli, A., Alan, M., <strong>Field, S.</strong></span>
+                    "Meta-Models: An Architecture for Decoding LLM Behaviors Through Interpreted Embeddings and Natural Language."
+                    <span class="venue">arXiv:2410.02472</span>, 2024.
+                    <a href="https://arxiv.org/abs/2410.02472" target="_blank">[arXiv]</a>
+                </li>
+            </ul>
+        </details>
+
+        <details class="accordion">
+            <summary>
+                <span class="caret" aria-hidden="true">▸</span>
+                <span class="summary-text">
+                    <h2>Blog Posts</h2>
+                    <span class="teaser">I want to have better ideas and communicate ideas more effectively. Therefore, I occasionally blog</span>
+                </span>
+            </summary>
+            
+            <ul>
+                <li><a href="https://blog.severinfield.com/p/evaluating-ai-models-for-state-aligned" target="_blank">Evaluating AI Models for State-Aligned Censorship</a></li>
+                <li><a href="https://blog.peterwildeford.com/cp/211076292" target="_blank">Interviewing 25 AI researchers about recursive self-improvement</a></li>
+                <li><a href="https://attacksurfaceai.substack.com/cp/210818149" target="_blank">When AI Builds Its Own Successor</a></li>
+                <li><a href="250/index.html">The Case for the American Experiment in a Decade of Algorithms and Autocratization</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/the-animals-arent-alright" target="_blank">The Animals Aren't Alright</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/the-west-lost-solar-can-we-avoid" target="_blank">The West Lost Solar, Can We Win AI Hardware?</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/nvidias-push-to-sell-americas-future" target="_blank">Nvidia's Push to Sell America's Future to China</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/the-speed-dilemma" target="_blank">The Speed Dilemma</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/i-read-every-survey-on-ai-researchers" target="_blank">I Read Every Survey of AI Researchers So You Don't Have To</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/whirlwind-tour-of-chain-of-thought" target="_blank">Whirlwind Tour of Chain of Thought Literature Relevant to Automating Alignment Research</a></li>
+                <li><a href="https://sevdeawesome.substack.com/p/a-review-of-weak-to-strong-generalization" target="_blank">A Review of Weak to Strong Generalization</a></li>
+            </ul>
+        </details>
+
+
+        <details class="accordion">
+            <summary>
+                <span class="caret" aria-hidden="true">▸</span>
+                <span class="summary-text">
+                    <h2>Stuff I like</h2>
+                    <span class="teaser">Some of the essays, videos, and books that have influenced me</span>
+                </span>
+            </summary>
+            
+            <ul class="stuff-list">
+                <li>
+                    <span class="type">podcast</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=YMfd3EoHfPI">Stephen Kotkin — How Stalin became the most powerful dictator in history</a> I also like Kotkin's <a class="sub" href="https://en.wikipedia.org/wiki/Stalin:_Paradoxes_of_Power,_1878%E2%80%931928">books</a>!</p>
+                </li>
+                <li>
+                    <span class="type">video</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=q9Figerh89g">The Power of Intelligence</a> a five-minute case that intelligence is the most powerful force we know</p>
+                </li>
+                <li>
+                    <span class="type">book</span>
+                    <p class="entry"><a class="title" href="https://www.amazon.com/dp/1984853694?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">Projections: A Story of Human Emotions by Karl Deisseroth</a> I REALLY like this book, and it's written by the father of optogenetics</p>
+                </li>
+                <li>
+                    <span class="type">essay</span>
+                    <p class="entry"><a class="title" href="https://situational-awareness.ai/" target="_blank">Situational Awareness</a> helped me appreciate the gravity of the current AI situation.</p>
+                </li>
+                <li>
+                    <span class="type">book</span>
+                    <p class="entry"><a class="title" href="https://www.amazon.com/dp/0393353664?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">Are We Smart Enough to Know How Smart Animals Are? by Frans de Waal</a> the most esteemed primatologist of my lifetime — changed how I think about minds unlike our own.</p>
+                </li>
+                <li>
+                    <span class="type">lectures</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/playlist?list=PLd7-bHaQwnthnOed1a85mF7L-Ki3kdiqp" target="_blank">Sarah Paine</a> motivated me to read up on grand strategy and world history</p>
+                </li>
+                <li>
+                    <span class="type">film</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=xkPbV3IRe4Y" target="_blank">The AI Doc</a> this movie includes AI optimists, pessimists, skeptics, and believers and somehow does justice to them all!</p>
+                </li>
+                <li>
+                    <span class="type">essay</span>
+                    <p class="entry"><a class="title" href="https://sites.cc.gatech.edu/computing/nano/documents/Joy%20-%20Why%20the%20Future%20Doesn%27t%20Need%20Us.pdf" target="_blank">Why the Future Doesn't Need Us by Bill Joy</a> a Wired article by the Sun Microsystems co-founder, way ahead of his time.</p>
+                </li>
+                <li>
+                    <span class="type">book</span>
+                    <p class="entry"><a class="title" href="https://www.amazon.com/dp/1541703375?lv=shuf&channelId=500&plpRedirect=mhFallback" target="_blank">Invisible Rulers by DiResta</a> made me concerned over the vulnerability of open societies</p>
+                </li>
+                <li>
+                    <span class="type">post</span>
+                    <p class="entry"><a class="title" href="https://blog.peterwildeford.com/p/the-alignment-problem-of-1776" target="_blank">The alignment problem of 1776</a> the most prescient blog post as of today</p>
+                </li>
+                <li>
+                    <span class="type">video</span>
+                    <p class="entry"><a class="title" href="https://www.youtube.com/watch?v=KUkHhVYv3jU">The King and The Golem</a> eventually, you have to take a leap of faith…</p>
+                </li>
+                <li>
+                    <span class="type">post</span>
+                    <p class="entry"><a class="title" href="https://www.slatestarcodexabridged.com/The-Toxoplasma-Of-Rage" target="_blank">The Toxoplasma of Rage</a> a heuristic on why rage-inducing ideas spread</p>
+                </li>
+                <li>
+                    <span class="type">essay</span>
+                    <p class="entry"><a class="title" href="https://www.lesswrong.com/posts/HLqWn5LASfhhArZ7w/expecting-short-inferential-distances" target="_blank">Expecting Short Inferential Distances</a> and if you think you can explain the concept of “systematically underestimated inferential distances” briefly, in just a few words, I've got some sad news for you…</p>
+                </li>
+
+                <!-- <li>Sort by Controversial [<a href="https://slatestarcodex.com/2018/10/30/sort-by-controversial/" target="_blank">blog post</a>]</li> -->
+
+            </ul>
+        </details>
+
+
+        <div class="claude-signature">
+            <a href="https://claude.ai" target="_blank">made with ♥ by claude</a>
+            <br><br>
+            <a href="./old/verd/index.html">old portfolio</a>
+        </div>
+    </div>
+</body>
+</html>
