@@ -38,15 +38,7 @@
         h1 {
             font-size: 1.6rem;
             font-weight: 500;
-            margin-bottom: 32px;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        li {
-            margin-bottom: 12px;
+            margin-bottom: 28px;
         }
 
         a {
@@ -62,23 +54,128 @@
             text-decoration-color: #ff8787;
         }
 
-        .primary a {
-            font-size: 1.2rem;
+        /* --- The brief itself --- */
+
+        .brief {
+            display: block;
+            border: 1px solid rgba(255,107,107,0.4);
+            border-radius: 10px;
+            padding: 22px 24px;
+            text-decoration: none;
+            background: rgba(255,107,107,0.06);
+            transition: background 0.18s ease, border-color 0.18s ease;
+        }
+
+        .brief:hover {
+            background: rgba(255,107,107,0.12);
+            border-color: rgba(255,107,107,0.75);
+        }
+
+        .brief .label {
+            display: block;
+            font-size: 0.72rem;
             font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,107,107,0.75);
+            margin-bottom: 6px;
         }
 
-        .more {
-            margin-top: 40px;
+        .brief .title {
+            display: block;
+            font-size: 1.75rem;
+            font-weight: 600;
+            line-height: 1.25;
+            color: #ffffff;
         }
 
-        .more li a {
+        .brief-alt {
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+
+        .brief-alt a {
+            color: rgba(255,255,255,0.55);
+            text-decoration-color: rgba(255,255,255,0.2);
+        }
+
+        .brief-alt a:hover {
+            color: #ff8787;
+            text-decoration-color: #ff8787;
+        }
+
+        /* --- Collapsed further reading --- */
+
+        .resources {
+            margin-top: 48px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        details {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 14px 0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.18s ease;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:hover {
+            color: rgba(255,255,255,0.85);
+        }
+
+        summary::before {
+            content: "+";
+            font-size: 1rem;
+            line-height: 1;
+            color: rgba(255,107,107,0.8);
+            width: 10px;
+        }
+
+        details[open] summary::before {
+            content: "\2013";
+        }
+
+        details ul {
+            list-style: none;
+            padding: 2px 0 18px 20px;
+        }
+
+        details li {
+            margin-bottom: 12px;
+        }
+
+        details li:last-child {
+            margin-bottom: 0;
+        }
+
+        details li a {
             color: rgba(255,255,255,0.7);
             text-decoration-color: rgba(255,255,255,0.25);
         }
 
-        .more li a:hover {
+        details li a:hover {
             color: #ff8787;
             text-decoration-color: #ff8787;
+        }
+
+        .byline {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -86,23 +183,49 @@
     <div class="container">
         <h1>Recursive Self-Improvement</h1>
 
-        <ul>
-            <li class="primary"><a href="RSI-Policy-Brief-Text-Only.pdf">Policy Brief</a></li>
-            <li><a href="RSI-Policy-Brief.pdf">Policy Brief (with graphics)</a></li>
-        </ul>
+        <a class="brief" href="RSI-Policy-Brief-Text-Only.pdf">
+            <span class="label">Policy Brief</span>
+            <span class="title">Recursive Self-Improvement</span>
+        </a>
+        <p class="brief-alt"><a href="RSI-Policy-Brief.pdf">Version with graphics &rarr;</a></p>
 
-        <ul class="more">
-            <li><a href="https://arxiv.org/abs/2603.03338">My Paper: AI Researchers' Views on Automating AI R&D and Intelligence Explosions</a></li>
-            <li><a href="https://severinfield.com/rsi">My Blog Post: The Day AI Builds Its Own Successor </a></li>
+        <div class="resources">
+            <details>
+                <summary>The OpenAI / Hugging Face Incident</summary>
+                <ul>
+                    <li><a href="https://x.com/METR_Evals/status/2092692175452803393?s=20">METR's evaluation of the incident</a> <span class="byline">— thread</span></li>
+                    <li><a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">The Hugging Face incident and the road ahead</a> <span class="byline">— OpenAI</span></li>
+                    <li><a href="https://www.iaps.ai/research/the-openaihugging-face-incident-challenges-in-controlling-and-containing-cyber-capable-ai-systems">Challenges in Controlling and Containing Cyber-Capable AI Systems</a> <span class="byline">— IAPS memo</span></li>
+                    <li><a href="https://www.clear-eyed.ai/p/openais-rogue-hacking-investigation">OpenAI's rogue-hacking investigation leaves major questions unanswered</a> <span class="byline">— Steven Adler</span></li>
+                    <li><a href="https://blog.peterwildeford.com/p/rogue-ai-attacks-deserve-more-scrutiny">Rogue AI attacks deserve more scrutiny than airplane crashes</a> <span class="byline">— Peter Wildeford</span></li>
+                </ul>
+            </details>
 
+            <details>
+                <summary>My Research</summary>
+                <ul>
+                    <li><a href="https://arxiv.org/abs/2603.03338">AI Researchers' Views on Automating AI R&amp;D and Intelligence Explosions</a> <span class="byline">(paper)</span></li>
+                    <li><a href="https://severinfield.com/rsi">The Day AI Builds Its Own Successor</a> <span class="byline">(blog post)</span></li>
+                </ul>
+            </details>
 
-            <li><a href="https://www.iaps.ai/research/the-openaihugging-face-incident-challenges-in-controlling-and-containing-cyber-capable-ai-systems">IAPS Memo: The OpenAI/Hugging Face Incident</a></li>
-            <li><a href="https://blog.peterwildeford.com/p/pacing-the-frontier">Pacing the Frontier by Peter Wildeford</a></li>
-            <li><a href="https://www.pacingthefrontier.com/">pacingthefrontier.com</a></li>
-            <li><a href="AI-Task-Horizon-Chart.pdf">AI task horizon chart (PDF)</a></li>
-            <li><a href="AI-Task-Horizon-Extrapolated.pdf">AI task horizon, extrapolated (PDF)</a></li>
-            <li><a href="https://metr.org/time-horizons/">Time Horizons dataset by METR</a></li>
-        </ul>
+            <details>
+                <summary>Pacing the Frontier</summary>
+                <ul>
+                    <li><a href="https://blog.peterwildeford.com/p/pacing-the-frontier">Pacing the Frontier</a> <span class="byline">— Peter Wildeford</span></li>
+                    <li><a href="https://www.pacingthefrontier.com/">pacingthefrontier.com</a></li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>AI Task Horizons</summary>
+                <ul>
+                    <li><a href="AI-Task-Horizon-Chart.pdf">AI task horizon chart (PDF)</a></li>
+                    <li><a href="AI-Task-Horizon-Extrapolated.pdf">AI task horizon, extrapolated (PDF)</a></li>
+                    <li><a href="https://metr.org/time-horizons/">Time Horizons dataset</a> <span class="byline">— METR</span></li>
+                </ul>
+            </details>
+        </div>
     </div>
 </body>
 </html>
