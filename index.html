@@ -456,18 +456,7 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
             transition: transform 0.32s cubic-bezier(0.3, 1.35, 0.5, 1), background 0.5s ease, box-shadow 0.5s ease;
         }
-        .cm-switch-hint {
-            position: absolute;
-            top: 50%;
-            right: 6px;
-            width: 10px;
-            height: 10px;
-            margin-top: -5px;
-            fill: rgba(255,255,255,0.34);
-            transition: fill 0.5s ease, transform 0.32s cubic-bezier(0.3, 1.35, 0.5, 1);
-        }
         .cm-switch:hover .cm-switch-track { border-color: rgba(255,255,255,0.26); }
-        .cm-switch:hover .cm-switch-hint { fill: rgba(255,255,255,0.6); }
         html.claude .cm-switch:hover .cm-switch-track { border-color: rgba(217,119,87,0.7); }
         .cm-switch[aria-checked="true"] .cm-switch-track {
             background: #141210;
@@ -478,10 +467,6 @@
             transform: translateX(20px);
             background: var(--cm-clay);
             box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 12px rgba(217,119,87,0.55);
-        }
-        .cm-switch[aria-checked="true"] .cm-switch-hint {
-            transform: translateX(-24px);
-            fill: var(--cm-clay);
         }
         .cm-switch.is-sparking .cm-switch-knob {
             animation: cm-spark 0.45s ease-out both;
@@ -499,7 +484,7 @@
         html.cm-still * { transition: none !important; animation: none !important; }
 
         @media (prefers-reduced-motion: reduce) {
-            body, #cm-wall, #cm-shade, .cm-switch-knob, .cm-switch-hint { transition: none !important; animation: none !important; }
+            body, #cm-wall, #cm-shade, .cm-switch-knob { transition: none !important; animation: none !important; }
         }
 
         @media (max-width: 600px) {
@@ -538,7 +523,6 @@
             <div class="cm-switch-row">
                 <button type="button" id="cm-switch" class="cm-switch" role="switch" aria-checked="false" aria-label="Claude mode" title="Claude mode">
                     <span class="cm-switch-track" aria-hidden="true">
-                        <svg class="cm-switch-hint" viewBox="0 0 12 12" focusable="false"><path d="M1 1h4v4H1zM7 1h4v4H7zM1 7h4v4H1zM7 7h4v4H7z"/></svg>
                         <span class="cm-switch-knob"></span>
                     </span>
                 </button>
