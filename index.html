@@ -717,7 +717,6 @@
         var sw = document.getElementById('cm-switch');
         var canvas = document.getElementById('cm-wall');
         var shade = document.getElementById('cm-shade');
-        var STORE = 'cm2:on';
         var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         /* ---- what the instances write: this page, and the fourteen pages before it ---- */
@@ -1275,7 +1274,7 @@
             mode = 'off';
         }
 
-        /* jump the simulation to time t (used for persisted ON, ?t=, reduced motion) */
+        /* jump the simulation to time t (used for ?t= and reduced motion) */
         function warp(t) {
             spawnDue(t);
             for (var i = 0; i < live.length; i++) prefill(live[i], t);
@@ -1298,7 +1297,6 @@
             if (opts.freeze) { html.classList.add('cm-freeze'); frozen = true; }
             html.classList.add('claude');
             sw.setAttribute('aria-checked', 'true');
-            try { localStorage.setItem(STORE, '1'); } catch (e) {}
             resize();
             var hasGL = initGL();
             resize();
@@ -1323,7 +1321,6 @@
             html.classList.remove('claude', 'cm-still', 'cm-framed');
             if (frozen) { html.classList.remove('cm-freeze'); frozen = false; }
             sw.setAttribute('aria-checked', 'false');
-            try { localStorage.removeItem(STORE); } catch (e) {}
             if (!gl || mode !== 'on') { teardown(); return; }
             if (reduced) { canvas.classList.remove('shown'); shade.classList.remove('shown'); setTimeout(teardown, 400); stop(); return; }
             mode = 'off';
@@ -1347,13 +1344,10 @@
         /* ---- entry ---- */
         var q = {};
         location.search.slice(1).split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); });
-        var persisted = false;
-        try { persisted = localStorage.getItem(STORE) === '1'; } catch (e) {}
 
         function boot() {
             if (q.on === '0') return;
             if (q.on === '1' || q.t !== undefined || q.freeze === '1') turnOn({ t: parseFloat(q.t) || 0, freeze: q.freeze === '1' });
-            else if (persisted) turnOn({ still: true });
         }
         if (document.readyState === 'complete') boot();
         else window.addEventListener('load', boot);
