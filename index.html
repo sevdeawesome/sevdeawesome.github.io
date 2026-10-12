@@ -410,71 +410,75 @@
                     rgba(10,10,11,0) 100%);
         }
 
-        /* ---- the switch: centred under the bio ---- */
-        .cm-switch-row {
+        /* ---- the two mode buttons, centred under the bio: Claude mode (#claude) and
+           situational awareness (#situation, situation/free-world.js). While one mode
+           is on its button is lit and is the off control; the other one hops modes. ---- */
+        .mode-row {
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 10px;
             margin-top: 28px;
         }
 
-        .cm-switch {
+        .mode-btn {
             appearance: none;
             -webkit-appearance: none;
-            border: 0;
-            background: none;
-            padding: 0;
-            margin: 0;
-            font: inherit;
-            color: inherit;
-            cursor: pointer;
-            position: relative;
             flex: none;
-            width: 44px;
-            height: 24px;
-            border-radius: 12px;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .cm-switch:focus-visible { outline: 2px solid #ff6b6b; outline-offset: 3px; }
-        .cm-switch-track {
-            position: absolute;
-            inset: 0;
-            border-radius: 12px;
-            background: #242424;
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.55);
-            transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-        .cm-switch-knob {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 18px;
-            height: 18px;
+            width: 30px;
+            height: 30px;
+            margin: 0;
+            padding: 0;
             border-radius: 50%;
-            background: #505050;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
-            transition: transform 0.32s cubic-bezier(0.3, 1.35, 0.5, 1), background 0.5s ease, box-shadow 0.5s ease;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 0.25s ease, border-color 0.25s ease, background 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease, visibility 0s linear 0s;
         }
-        .cm-switch:hover .cm-switch-track { border-color: rgba(255,255,255,0.26); }
-        html.claude .cm-switch:hover .cm-switch-track { border-color: rgba(217,119,87,0.7); }
-        .cm-switch[aria-checked="true"] .cm-switch-track {
-            background: #141210;
-            border-color: rgba(217,119,87,0.55);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 0 4px rgba(217,119,87,0.10), 0 0 18px rgba(217,119,87,0.18);
+        .mode-btn svg { width: 16px; height: 16px; pointer-events: none; }
+        .mode-btn:hover { color: #ff8787; border-color: rgba(255,135,135,0.5); }
+        .mode-btn:focus-visible { outline: 2px solid #ff6b6b; outline-offset: 3px; }
+
+        #cm-switch[aria-checked="true"] {
+            color: var(--cm-clay);
+            border-color: rgba(217,119,87,0.7);
+            background: rgba(217,119,87,0.12);
+            box-shadow: 0 0 14px rgba(217,119,87,0.3);
         }
-        .cm-switch[aria-checked="true"] .cm-switch-knob {
-            transform: translateX(20px);
-            background: var(--cm-clay);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 12px rgba(217,119,87,0.55);
+        #fw-switch[aria-checked="true"] {
+            color: #8fb0ff;
+            border-color: rgba(110,150,255,0.7);
+            background: rgba(76,125,255,0.14);
+            box-shadow: 0 0 14px rgba(76,125,255,0.32);
         }
-        .cm-switch.is-sparking .cm-switch-knob {
-            animation: cm-spark 0.45s ease-out both;
-        }
-        @keyframes cm-spark {
+        .mode-btn.is-sparking, .mode-btn.is-igniting { animation: mode-spark 0.5s ease-out both; }
+        #fw-switch.is-sparking, #fw-switch.is-igniting { animation-name: mode-spark-blue; }
+        @keyframes mode-spark {
             0% { box-shadow: 0 0 0 0 rgba(217,119,87,0.9), 0 0 22px rgba(217,119,87,0.9); }
             100% { box-shadow: 0 0 0 14px rgba(217,119,87,0), 0 0 0 rgba(217,119,87,0); }
         }
+        @keyframes mode-spark-blue {
+            0% { box-shadow: 0 0 0 0 rgba(110,150,255,0.9), 0 0 22px rgba(110,150,255,0.9); }
+            100% { box-shadow: 0 0 0 14px rgba(110,150,255,0), 0 0 0 rgba(110,150,255,0); }
+        }
+
+        .mode-hint {
+            height: 1.2em;
+            margin-top: 8px;
+            text-align: center;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: rgba(255,255,255,0.45);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            user-select: none;
+        }
+        .mode-hint.show { opacity: 1; }
 
         /* ---- freeze / reduced motion ---- */
         html.cm-freeze *, html.cm-freeze *::before, html.cm-freeze *::after {
@@ -484,7 +488,7 @@
         html.cm-still * { transition: none !important; animation: none !important; }
 
         @media (prefers-reduced-motion: reduce) {
-            body, #cm-wall, #cm-shade, .cm-switch-knob { transition: none !important; animation: none !important; }
+            body, #cm-wall, #cm-shade, .mode-btn, .mode-hint { transition: none !important; animation: none !important; }
         }
 
         @media (max-width: 600px) {
@@ -520,13 +524,15 @@
 
                 </p>
 
-            <div class="cm-switch-row">
-                <button type="button" id="cm-switch" class="cm-switch" role="switch" aria-checked="false" aria-label="Claude mode" title="Claude mode">
-                    <span class="cm-switch-track" aria-hidden="true">
-                        <span class="cm-switch-knob"></span>
-                    </span>
+            <div class="mode-row">
+                <button type="button" id="cm-switch" class="mode-btn" role="switch" aria-checked="false" aria-label="Claude mode">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+                <button type="button" id="fw-btn" class="mode-btn" aria-label="Situational awareness">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><path d="M3.5 12h17M5.2 7.6h13.6M5.2 16.4h13.6"/></svg>
                 </button>
             </div>
+            <div class="mode-hint" aria-hidden="true"></div>
 
         </div>
 
@@ -1330,13 +1336,96 @@
         location.search.slice(1).split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); });
 
         function boot() {
-            if (q.on === '0') return;
+            if (q.on === '0' || location.hash === '#situation' || location.hash === '#claude') return;
             if (q.on === '1' || q.t !== undefined || q.freeze === '1') turnOn({ t: parseFloat(q.t) || 0, freeze: q.freeze === '1' });
         }
         if (document.readyState === 'complete') boot();
         else window.addEventListener('load', boot);
 
         window.__cm = { stats: function () { return { t: tNow, mode: mode, instances: live.length, words: totalWords, zoom: Zcur, ax: ax, ay: ay, vw: vw, vh: vh, glyph: CH * Zcur >= GLYPH_MIN_PX }; } };
+    })();
+    </script>
+    <script>
+    /* Modes live in the URL: #claude (Claude mode, above) and #situation (situation/free-world.js,
+       fetched only when asked for). /claude/ and /situation/ redirect here. */
+    (function () {
+        var cm = document.getElementById('cm-switch');
+        var fwBtn = document.getElementById('fw-btn');
+        var row = document.querySelector('.mode-row');
+        var hint = document.querySelector('.mode-hint');
+        var loading = false;
+
+        function clearHash() { if (history.replaceState) history.replaceState(history.state, '', location.pathname + location.search); }
+        function cmOn() { return cm.getAttribute('aria-checked') === 'true'; }
+
+        /* situation: load once, then play / stop */
+        function situation(want) {
+            if (!want) { if (window.__fw) window.__fw.stop(); return; }
+            if (window.__fw) { window.__fw.play(); return; }
+            if (loading) return;
+            loading = true;
+            var s = document.createElement('script');
+            s.src = 'situation/free-world.js';
+            s.onload = s.onerror = function () { s.remove(); loading = false; if (location.hash === '#situation' && window.__fw) window.__fw.play(); };
+            document.head.appendChild(s);
+        }
+
+        function fwActive() { return !!(window.__fw && window.__fw.active()); }
+
+        /* one mode at a time: the outgoing scene winds down before the next one starts
+           (free-world.js already waits for Claude mode; this is the other direction) */
+        function claudeAfterSituation() {
+            if (fwActive()) { setTimeout(claudeAfterSituation, 60); return; }
+            if (location.hash === '#claude' && !cmOn()) cm.click();
+        }
+
+        function route() {
+            var h = location.hash;
+            if (h !== '#claude' && cmOn()) cm.click();
+            situation(h === '#situation');
+            if (h === '#claude' && !cmOn()) claudeAfterSituation();
+        }
+
+        /* pressing Claude mode while situation is on hops modes instead of stacking them */
+        function hop(e) {
+            if (!fwActive()) return;
+            if (e.type === 'keydown' && e.key !== ' ' && e.key !== 'Enter') return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            location.hash = 'claude';
+        }
+        cm.addEventListener('click', hop, true);
+        cm.addEventListener('keydown', hop, true);
+
+        /* Claude mode's own script toggles the button; keep the URL in step with it */
+        new MutationObserver(function () {
+            if (cmOn() && location.hash !== '#claude') history.pushState(null, '', '#claude');
+            else if (!cmOn() && location.hash === '#claude') clearHash();
+        }).observe(cm, { attributes: true, attributeFilter: ['aria-checked'] });
+
+        fwBtn.addEventListener('click', function () {
+            if (location.hash === '#situation') situation(true); else location.hash = 'situation';
+        });
+
+        /* the label appears under the buttons on hover / focus */
+        function label(e) {
+            var b = e.target.closest && e.target.closest('.mode-btn');
+            if (!b) return;
+            hint.textContent = b.getAttribute('aria-label').toLowerCase() + (b.getAttribute('aria-checked') === 'true' ? ' · on' : '');
+            hint.classList.add('show');
+        }
+        function unlabel() { if (!row.matches(':focus-within') && !row.matches(':hover')) hint.classList.remove('show'); }
+        row.addEventListener('mouseover', label);
+        row.addEventListener('focusin', label);
+        row.addEventListener('click', label);
+        row.addEventListener('mouseleave', unlabel);
+        row.addEventListener('focusout', function () { setTimeout(unlabel, 0); });
+
+        window.addEventListener('hashchange', route);
+        if (location.hash === '#claude' || location.hash === '#situation') {
+            if (document.readyState === 'complete') route();
+            else window.addEventListener('load', route);
+        }
     })();
     </script>
 </body>
