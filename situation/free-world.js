@@ -1548,8 +1548,7 @@
     var api = { done: function () { if (scene) scene.destroy(); scene = null; active = false; unmount(); } };
     function start() {
         active = true;
-        /* the scene is composed around the header: present it from the top (one jump, hidden by the night falling) */
-        if (window.scrollY || window.pageYOffset) window.scrollTo(0, 0);
+        /* no scroll jump: the scene is pinned to the viewport, and the lit button (the off control) stays under the cursor */
         mount();
         scene = Scene(api);
         scene.boot();
